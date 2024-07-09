@@ -1,0 +1,355 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<partial name="_AdminPartial" />
+
+<div class="px-5 mb-4">
+
+    <div class="row py-3">
+        <div class="col-xl-4 col-md-6 col-sm-6 mb-4">
+            <div class="card shadow h-100 py-2" style="border-left: .25rem solid #4e73df !important;">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="fw-bold text-primary text-uppercase mb-1" style="font-size: .8em;">
+                                Total Clerk
+                            </div>
+                            <div class="h5 fw-bold text-secondary mb-0">
+                                1500
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="lni lni-user" style="font-size: 2em; font-weight: 800; color: #dddfeb"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 col-sm-6 mb-4">
+            <div class="card shadow h-100 py-2" style="border-left: .25rem solid #198754 !important;">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="fw-bold text-success text-uppercase mb-1" style="font-size: .8em;">
+                                Total Clerk
+                            </div>
+                            <div class="h5 fw-bold text-secondary mb-0">
+                                1500
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="lni lni-user" style="font-size: 2em; font-weight: 800; color: #dddfeb"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4 col-md-6 col-sm-6 mb-4">
+            <div class="card shadow h-100 py-2" style="border-left: .25rem solid #dc3545 !important;">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="fw-bold text-danger text-uppercase mb-1" style="font-size: .8em;">
+                                Total Clerk
+                            </div>
+                            <div class="h5 fw-bold text-secondary mb-0">
+                                1500
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="lni lni-user" style="font-size: 2em; font-weight: 800; color: #dddfeb"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-8">
+            <div class="bg-white rounded border shadow">
+                <h6 class="p-3 fw-bold m-0 border-bottom">Clerk Statistics</h6>
+                <div class="d-flex align-items-center justify-content-between p-2 px-5">
+
+                    <div class="d-flex align-items-center gap-2">
+                        <select id="selectedClerk" onchange="LoadData( this.value, document.getElementById('selectedYear').value, document.getElementById('selectedMonth').value)" class="form-select">
+                            <option value="" selected disabled>select clerk</option>
+                            <option value="">All</option>
+                        </select>
+
+                    </div>
+
+                    <div class="month-Container">
+                        <h1 id="monthSelect">All</h1>
+                    </div>
+
+                    <div class="yearContainer d-flex gap-2">
+                        <select id="selectedYear" onchange="LoadData(document.getElementById('selectedClerk').value, this.value,  document.getElementById('selectedMonth').value)" class="form-select">
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                            <option value="2026">2026</option>
+                            <option value="2027">2027</option>
+                            <option value="2028">2028</option>
+                            <option value="2029">2029</option>
+                            <option value="2030">2030</option>
+                        </select>
+
+                        <select id="selectedMonth" onchange="LoadData(document.getElementById('selectedClerk').value, document.getElementById('selectedYear').value, this.value)" class="form-select">
+                            <option data-month="All" value="">All</option>
+                            <option data-month="January" value="01">January</option>
+                            <option data-month="February" value="02">February</option>
+                            <option data-month="March" value="03">March</option>
+                            <option data-month="April" value="04">April</option>
+                            <option data-month="May" value="05">May</option>
+                            <option data-month="June" value="06">June</option>
+                            <option data-month="July" value="07">July</option>
+                            <option data-month="August" value="08">August</option>
+                            <option data-month="September" value="09">September</option>
+                            <option data-month="October" value="10">October</option>
+                            <option data-month="November" value="11">November</option>
+                            <option data-month="December" value="12">December</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="pb-5 mx-3">
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-4">
+            <div class="pb-5 mx-5">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+@* 
+    <div class="bg-white rounded border shadow">
+        <div class="d-flex align-items-center justify-content-between p-2 border-bottom">
+            <h6 class="px-3 fw-bold m-0">Category Statistics</h6>
+
+            <div class="yearContainer d-flex gap-2">
+                <select id="selectedYear" class="form-select">
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                    <option value="2029">2029</option>
+                    <option value="2030">2030</option>
+                </select>
+
+                <select id="selectedMonth" onchange="LoadData(document.getElementById('selectedYear').value, this.value)" class="form-select">
+                    <option value="">All</option>
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="py-3 pb-5 mx-5">
+            <canvas id="myChart"></canvas>
+        </div>
+    </div>
+ *@
+
+    <style>
+        #myChart {
+            width: 100% !important;
+            height: auto;
+            padding: 30px;
+            border-radius: 20px;
+            /* border: solid 3px rgba(54, 162, 235, 1) !important; */
+            background: white;
+        }
+    </style>
+
+</div>
+
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-tooltip"></script>
+
+<script>
+    var myChart;
+    var labels = [];
+    var datasets = [];
+
+    $(document).ready(function () {
+        var yearDropdown = document.getElementById('selectedYear').value;
+        var monthDropdown = document.getElementById('selectedMonth').value;
+        const xValues = ["Months"];
+
+        myChart = new Chart("myChart", {
+            type: "line",
+            data: {
+                labels: xValues,
+                datasets: []
+            },
+            options: {
+                legend: {
+                    display: true              
+                },
+                tooltips: {
+                    mode: 'index',
+                    intersect: false
+                },
+                elements: {
+                    line: {
+                        tension: 0.1
+                    }
+                },
+                scales: {
+                    x: {
+                        categorySpacing: 1,
+                        ticks: {
+                            autoSkip: true,
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
+                    y: {
+                        min: 0,
+                    },
+                },
+            },
+            plugins: [plugin]
+        });
+        LoadData(yearDropdown, monthDropdown);
+    });
+
+    //Plugin
+    const plugin = {
+        beforeInit(chart) {
+            const originalFit = chart.legend.fit;
+            chart.legend.fit = function fit() {
+                originalFit.bind(chart.legend)();
+                this.height += 30;
+            }
+        }
+    }
+
+    // Load the Data
+    function LoadData(yearData, monthData) {
+
+        $.ajax({
+            type: 'GET',
+            url: '/Admin/GetDataByYearAndMonth',
+            dataType: 'json',
+            data: { year: yearData, month: monthData },
+            success: function (data) {
+                // console.log(data);
+
+                if (data && data.isMonth == true) {
+                    data = data.value.sort((a, b) => a.month - b.month);
+                    labels = data.map(item => {
+                        const monthIndex = parseInt(item.month) - 1;
+                        const monthName = new Date(0, monthIndex).toLocaleString('en-US', { month: 'long' });
+                        return monthName;
+                    });
+                }
+                // else if (data && data.isMonth == false) {
+                //     data = data.value.sort((a, b) => a.day - b.day);
+                //     labels = data.map(item => item.day);
+                // }
+                else if (data && data.isMonth == false) {
+                    data = data.value.sort((a, b) => a.day - b.day);
+                    labels = data.map(item => {
+                        const year = item.generateDate.substring(0, 4);
+                        const month = item.generateDate.substring(4, 6);
+                        const day = item.generateDate.substring(6, 8);
+                        const formattedDate = `${day}\n${new Date(year, month - 1, day).toLocaleString('en-US', { weekday: 'long' })}`;
+                        return formattedDate;
+                    });
+                }
+
+
+                datasets = [
+                    {
+                        label: 'Category A',
+                        data: data.map(item => item.categoryASum),
+                        borderColor: "#157347",
+                        backgroundColor: "#157347",
+                        pointBackgroundColor: "#157347",
+                        pointRadius: 5,
+                        fill: false
+                    },
+                    {
+                        label: 'Category B',
+                        data: data.map(item => item.categoryBSum),
+                        borderColor: "#81A263",
+                        backgroundColor: "#81A263",
+                        pointBackgroundColor: "#81A263",
+                        pointRadius: 5,
+                        fill: false
+                    },
+                    {
+                        label: 'Category C',
+                        data: data.map(item => item.categoryCSum),
+                        borderColor: "#ffca2c",
+                        backgroundColor: "#ffca2c",
+                        pointBackgroundColor: "#ffca2c",
+                        pointRadius: 5,
+                        fill: false
+                    },
+                    {
+                        label: 'Category D',
+                        data: data.map(item => item.categoryDSum),
+                        borderColor: "#F9D689",
+                        backgroundColor: "#F9D689",
+                        pointBackgroundColor: "#F9D689",
+                        pointRadius: 5,
+                        fill: false
+                    },
+                    {
+                        label: 'Category E',
+                        data: data.map(item => item.categoryESum),
+                        borderColor: "#dc3545",
+                        backgroundColor: "#dc3545",
+                        pointBackgroundColor: "#dc3545",
+                        pointRadius: 5,
+                        fill: false
+                    },
+                    {
+                        label: 'Category F',
+                        data: data.map(item => item.categoryFSum),
+                        borderColor: "#0b5ed7",
+                        backgroundColor: "#0b5ed7",
+                        pointBackgroundColor: "#0b5ed7",
+                        pointRadius: 5,
+                        fill: false
+                    },
+                ];
+
+                myChart.data.labels = labels;
+                myChart.data.datasets = datasets;
+                myChart.update();
+            },
+            error: function (error) {
+                console.log("Error:", error);
+            }
+        });
+    }
+
+
+</script>

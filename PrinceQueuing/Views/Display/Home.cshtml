@@ -1,0 +1,217 @@
+﻿@{
+    ViewData["Title"] = "Display Page";
+    Layout = "_DisplayLayout";
+
+    var videoFiles = ViewBag.VideoFiles as string[];
+
+}
+
+<div class="customer-body">
+    <div class="customer-left" id="clerkContainer">
+        <h1 class="nowServing text-center">Now Serving</h1>
+        <div class="clerk1">
+            <div class="left">
+
+                <div class="number1">
+                    <h1>1</h1>
+                </div>
+                <div class="number2">
+                    <h1>CLERK</h1>
+                </div>
+
+            </div>
+            <div class="right">
+                <h1 id="TVClerk1">----</h1>
+            </div>
+        </div>
+        <div class="clerk2">
+            <div class="left">
+
+                <div class="number1">
+                    <h1>2</h1>
+                </div>
+                <div class="number2">
+                    <h1>CLERK</h1>
+                </div>
+
+            </div>
+            <div class="right">
+                <h1 id="TVClerk2">----</h1>
+            </div>
+        </div>
+        <div class="clerk3">
+            <div class="left">
+
+                <div class="number1">
+                    <h1>3</h1>
+                </div>
+                <div class="number2">
+                    <h1>CLERK</h1>
+                </div>
+
+            </div>
+            <div class="right">
+                <h1 id="TVClerk3">----</h1>
+            </div>
+        </div>
+    </div>
+
+    <!--Right-->
+    <div class="customer-right">
+        <div class="customer-video">
+            <div class="w-100 h-100">
+                <video id="main-video-page2" class="w-100 h-100" preload="auto" style="object-fit:fill;" controls autoplay muted >
+                    @foreach (var videoFile in videoFiles!)
+                    {
+                        <source src="@videoFile" type="video/mp4">
+                    }
+                </video>
+
+                <div class="time">
+                    <h2 id="time"></h2>
+                    <span id="date"></span>
+                </div>
+            </div>
+
+        </div>
+        <div class="advertisement">
+            <div class="top">
+                <div class="prince-logo">
+                    <div class="img-cont">
+                        <img src="~/src/logo-prince.png" />
+                    </div>
+                </div>
+                <div class="announcement">
+                    <h2>Announcement!</h2>
+                    <div class="announcement-words" >
+                        <p id="announcementWord"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom">
+                <marquee class="w-100">
+                    <h2>Prince retail Sabay sa Buhay! for more inquiries call (032) 254-5565 </h2>
+                </marquee>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        var videoPlayer = document.getElementById('main-video-page2');
+        var videoFiles = @Html.Raw(Json.Serialize(videoFiles));
+        // console.log(videoFiles)
+        var videoIndex = 0;
+        videoPlayer.play();
+
+        videoPlayer.addEventListener('ended', function () {
+            videoIndex++;
+            if (videoIndex >= videoFiles.length) {
+                videoIndex = 0;
+            }
+            videoPlayer.src = videoFiles[videoIndex];
+            videoPlayer.play();
+
+        });
+
+        //Load Serving
+        DisplayServeTV();
+        // Initial display
+        displayDateTime();
+        setInterval(displayDateTime, 1000);
+    });
+
+    const displayDateTime = () => {
+        var currentTime = new Date();
+        var options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+        var formattedTime = currentTime.toLocaleString('en-US', options);
+        var optionsDate = { year: 'numeric', month: 'long', day: 'numeric' };
+        var formattedDate = currentTime.toLocaleString('en-US', optionsDate);
+
+        $('#time').text(formattedTime);
+        $('#date').text(formattedDate);
+    };
+
+    // Function for Display Current Serve AND QueuesCount
+    // function DisplayServeTV() {
+    //     $.ajax({
+    //         type: 'GET',
+    //         url: "/Display/GetServings",
+    //         dataType: "json",
+    //         success: function (response) {
+    //             // response.forEach(function (value) {
+    //             //     if (value) {
+    //             //         //clerk
+    //             //         var clerkNumber = value.user.clerkNumber.toLowerCase();
+    //             //         var display = document.getElementById('TVClerk' + clerkNumber.charAt(clerkNumber.length - 1));
+    //             //         var category = value.categoryId;
+
+    //             //         if (display) {
+    //             //             var categoryLetter = getCategoryLetter(category);
+    //             //             var queueNumberServe = value.queueNumberServe !== null ? value.queueNumberServe : "----";
+    //             //             //display
+    //             //             display.innerText = categoryLetter + " - " + queueNumberServe;
+    //             //         }
+    //             //     }
+    //             // });
+    //         },
+    //         error: function (req, status, error) {
+    //             console.log(status);
+    //         }
+    //     });
+    // }
+
+    //Helper
+
+    function DisplayServeTV() {
+        $.ajax({
+            type: 'GET',
+            url: "/Display/GetServings",
+            dataType: "json",
+            success: function (response) {
+                console.log(response)
+
+                // Loop through the clerks and display the queue numbers
+                for (var i = 1; i <= 3; i++) {
+                    var clerkNumber = localStorage.getItem("Clerk" + i);
+                    var display = document.getElementById('TVClerk' + i);
+
+                    if (display && clerkNumber) {
+                        var servedCustomer = response.find(function (item) {
+                            return item.userId === clerkNumber;
+                        });
+
+                        if (servedCustomer) {
+                            var categoryLetter = getCategoryLetter(servedCustomer.categoryId);
+                            var queueNumberServe = servedCustomer.queueNumberServe !== null ? servedCustomer.queueNumberServe : "----";
+                            display.innerText = categoryLetter + " - " + queueNumberServe;
+                        } else {
+                            display.innerText = "----";
+                        }
+                    }
+                }
+            },
+            error: function (req, status, error) {
+                console.log(status);
+            }
+        });
+    }
+
+    function getCategoryLetter(categoryId) {
+        var categories = {
+            1: "A",
+            2: "B",
+            3: "C",
+            4: "D"
+        };
+        return categories[categoryId] || "----";
+    }
+
+
+</script>
+

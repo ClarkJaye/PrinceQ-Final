@@ -1,0 +1,90 @@
+﻿@model Queues
+
+@{
+    ViewData["Title"] = "Print QueueNumber";
+    Layout = "_FormLayout";
+}
+
+<header>
+    <div class="container-fluid text-center border">
+        <div class="d-flex align-items-center justify-content-between px-3">
+            <a class="navbar-brand">
+                <img src="~/src/prg_logo.png" style="width:80px;height: 80px;object-fit: contain;" alt="Queue_Interview" />
+            </a>
+            <h2 class="fst-italic"> QUEUE NUMBER </h2>
+        </div>
+
+        <div class="d-flex flex-column align-items-center">
+
+            @* <div class="border rounded p-3 px-5" style="max-width: 300px;"> *@
+                <h1 class=" fw-bold text-center" style="font-size: 80px;">
+                    @if (Model.CategoryId == 1)
+                    {
+                        <text>A - @Model.QueueNumber</text>
+                    }
+                    else if (Model.CategoryId == 2)
+                    {
+                        <text>B - @Model.QueueNumber</text>
+                    }
+                    else if (Model.CategoryId == 3)
+                    {
+                        <text>C - @Model.QueueNumber</text>
+                    }
+                    else if (Model.CategoryId == 4)
+                    {
+                        <text>D - @Model.QueueNumber</text>
+                    }
+                </h1>
+            @* </div> *@
+
+            <div class="mt-4 mb-2">
+                <h5 class="fw-bold">@DateTime.ParseExact(Model.QueueId!.ToString(), "yyyyMMdd", null).ToString("MMMM d, yyyy")</h5>
+            </div>
+
+        </div>
+
+    </div>
+</header>
+
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+<script>
+
+    $(document).ready(function () {
+        PrintQueueForm();
+    });
+
+    // Print
+    function PrintQueueForm() {
+        window.onafterprint = function () {
+            window.location.href = "/RegisterPersonnel/Home";
+        };
+
+        // Define print styles
+        var printStyles = `
+            @@media print {
+                @@page {
+                    size: 6in 3in;
+                    margin: 0;
+                }
+
+                body {
+                    margin: 0;
+                }
+
+            }
+        `;
+
+        // Create a new stylesheet element
+        var printStylesheet = document.createElement('style');
+        printStylesheet.type = 'text/css';
+        printStylesheet.innerHTML = printStyles;
+
+        // Append the stylesheet to the document head
+        document.head.appendChild(printStylesheet);
+
+        window.print();
+    }
+
+</script>

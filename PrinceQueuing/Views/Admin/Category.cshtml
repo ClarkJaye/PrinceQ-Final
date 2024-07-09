@@ -1,0 +1,164 @@
+﻿@model Category
+
+@{
+    ViewData["Title"] = "Category";
+    Layout = "_AdminLayout";
+}
+
+<!--For Navbar-->
+<partial name="_AdminPartial" />
+
+<style>
+    .custom-btn-font {
+        font-size: 12px;
+        border-radius: 20px;
+    }
+</style>
+
+<div class="px-5 mb-4">
+
+    <div class="row py-3">
+        <div class="col-xl-3 col-md-4 col-sm-6 mb-4">
+            <div class="card shadow h-100 py-2" style="border-left: .25rem solid #4e73df !important;">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="fw-bold text-primary text-uppercase mb-1" style="font-size: .8em;">
+                                Total Category
+                            </div>
+                            <div class="h4 fw-bold text-secondary mb-0" id="categoryCount">
+                                <!--Total Category-->
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="lni lni-layout" style="font-size: 2em; font-weight: 800; color: #dddfeb"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow mb-4">
+
+        <div class="card-header py-3">
+            <h6 class="m-0 fw-bold text-dark">
+                Category List
+            </h6>
+        </div>
+
+        <div class="card-body pt-0">
+            <div class="table-responsive p-1">
+
+                <!-- Add New Category -->
+                <div class="py-3 float-end">
+                    <button type="button" class="btn btn-primary d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#categoryModal">
+                        <i class="lni lni-plus mr-2 fw-bold"></i>
+                        <span> Add New Category</span>
+                    </button>
+                </div>
+
+                <!-- Category Table -->
+                <table id="categoryTable" class="table table-striped align-middle table-responsive border" style="width:100%; table-layout:auto;">
+                    <thead class="border-top">
+                        <tr class="text-start fw-bold text-uppercase border-bottom" style="color: #666666;">
+                            <th>Category Name</th>
+                            <th>Description</th>
+                            <th>Created At</th>
+                            <th>Status</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <!-- Data will be populated here -->
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Add Modal -->
+<div class="modal fade" id="categoryModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Category</h5>
+                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addCategoryForm" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                    <div class="mb-3">
+                        <label asp-for="CategoryName" class="p-0"></label>
+                        <input asp-for="CategoryName" class="form-control" />
+                        <span asp-validation-for="CategoryName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="p-0"></label>
+                        <input asp-for="Description" class="form-control" />
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+
+                    <div class="mb-3 text-end">
+                        <button type="submit" class="btn btn-primary" id="addBtn">Add</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="categoryEditModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Category</h5>
+                <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="updateCategoryForm" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                    <input id="editCategoryId" name="CategoryId" hidden/>
+
+                    <div class="mb-3">
+                        <label for="editCategoryName" class="p-0">Category Name</label>
+                        <input id="editCategoryName" name="CategoryName" class="form-control" />
+                        <span id="CategoryNameValid" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editDescription" class="p-0">Description</label>
+                        <input id="editDescription" name="Description" class="form-control" />
+                        <span id="DescriptionValid" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3 d-none" id="category_created_at">
+                        <label for="editCreated_At" class="p-0">Created At</label>
+                        <input id="editCreated_At" name="Created_At" class="form-control" disabled />
+                    </div>
+
+                    <div class="mb-3 text-end">
+                        <button type="submit" class="btn btn-success" id="updateBtn">Update</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="/js/admin/CategoryScript.js"></script>

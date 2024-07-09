@@ -1,0 +1,147 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - PrinceQueuing</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/PrinceQueuing.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.lineicons.com/4.0/lineicons.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css" />
+    <link rel="stylesheet" href="/lib/dist/virtual-select.min.css" />
+
+
+</head>
+<body>
+      <div class="wrapper">
+        @* <aside id="sidebar" class="expand"> *@
+        <aside id="sidebar" class="">
+            <div class="d-flex">
+                <button class="toggle-btn">
+                    <img src="~/Audio/logo.png" alt="" width="40" height="40" class="rounded-circle me-3">
+                </button>
+                <div class="sidebar-logo">
+                    <a asp-controller="Admin" asp-action="Dashboard">PrinceQ</a>
+                </div>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="sidebar-item">
+                    <a asp-controller="Admin" asp-action="Dashboard" class="sidebar-link">
+                        <i class="lni lni-grid-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link collapsed has-dropdown text-white" data-bs-toggle="collapse"
+                       data-bs-target="#auth" aria-expanded="false" aria-controls="auth">
+                        <i class="lni lni-stats-up"></i>
+                        <span>Reports</span>
+                    </a>
+                    <ul id="auth" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                        <li class="sidebar-item">
+                            <a asp-controller="Admin" asp-action="ServingReport" class="sidebar-link">Serving Statistics</a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a asp-controller="Admin" asp-action="ClerkReport" class="sidebar-link">Clerk Statistics</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="sidebar-item">
+                    <a asp-controller="Admin" asp-action="Category" class="sidebar-link">
+                        <i class="lni lni-layout"></i>
+                        <span>Category</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a asp-controller="Admin" asp-action="Users" class="sidebar-link">
+                        <i class="lni lni-user"></i>
+                        <span>Users</span>
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a asp-controller="Admin" asp-action="ManageVideo" class="sidebar-link">
+                        <i class="lni lni-video"></i>
+                        <span>Manage Video</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <a asp-controller="Account" asp-action="Logout" class="sidebar-link text-warning">
+                    <i class="lni lni-exit"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <div class="container-fluid px-0 main" id="containerSide">
+            <partial name="_Notification" />
+            @RenderBody()
+        </div>
+
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            // Check localStorage for sidebar status on page load
+            var sidebarStatus = localStorage.getItem('sidebarStatus');
+            if (sidebarStatus === 'expand') {
+                $('#sidebar').addClass('expand').removeClass('collapse');
+            } else {
+                $('#sidebar').removeClass('expand').addClass('collapse');
+            }
+
+            // Update sidebar status and localStorage on button click
+            $('#toggle-side').on('click', function () {
+                $('#sidebar').toggleClass('expand collapse');
+
+                var newSidebarStatus = $('#sidebar').hasClass('expand') ? 'expand' : 'collapse';
+                localStorage.setItem('sidebarStatus', newSidebarStatus);
+            });
+
+            // Update sidebar on window resize
+            $(window).on('resize', function () {
+                if (window.matchMedia('(min-width: 1200px)').matches) {
+                    $('#sidebar').addClass('expand').removeClass('collapse');
+                    localStorage.setItem('sidebarStatus', 'expand');
+                } else {
+                    $('#sidebar').removeClass('expand').addClass('collapse');
+                    localStorage.setItem('sidebarStatus', 'collapse');
+                }
+            });
+        });
+
+        toastr.options = {
+            "closeButton": false,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": false,
+            "positionClass": "toast-bottom-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+    </script>
+
+</body>
+</html>
