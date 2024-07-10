@@ -141,6 +141,26 @@
         }
     }
 
+
+    .blink-red {
+        animation: blink 1s infinite;
+    }
+
+    @@keyframes blink {
+        0% {
+            color: black;
+        }
+
+        50% {
+            color: red;
+        }
+
+        100% {
+            color: black;
+        }
+    }
+
+
 </style>
 
 <div class="container-fluid h-100">
@@ -247,7 +267,7 @@
 
 
 
- @*            <!------PROCESS------->
+@*             <!------PROCESS------->
             <div class="row" style="border-top: 1px solid #5c636a">
                 @if(clerkNumber?.ToLower() == "clerk 1")
                 {
@@ -272,7 +292,7 @@
                         </div>
                     </div>
                 }
-                else if (clerkNumber?.ToLower() == "Clerk 2" || clerkNumber?.ToLower() == "Clerk 3")
+                else if (clerkNumber?.ToLower() == "clerk 2" || clerkNumber?.ToLower() == "clerk 3")
                 {
                     <div class="col-12">
                         <!------Releasing------->

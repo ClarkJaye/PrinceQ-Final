@@ -32,6 +32,7 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 1;
+            cursor: pointer;
         }
 
     @@media only screen and (max-width: 1300px) {
@@ -69,7 +70,9 @@
                 <video src="" id="main-video" controls class="w-100 rounded-3" autoplay></video>
             </div>
 
-            <div class="actions mt-3 float-end">
+            <div class="actions mt-3 d-flex align-items-center justify-content-center gap-3">
+                <button class="btn btn-danger">Delete this video</button>
+
                 <button class="btn btn-success">Play in Monitor</button>
             </div>
 

@@ -2,9 +2,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using PrinceQ.DataAccess.Repository;
 using PrinceQ.Models.Entities;
 using PrinceQ.Models.ViewModel;
 using PrinceQ.Utility;
+using System.Management;
 using System.Security.Claims;
 
 namespace PrinceQueuing.Controllers
@@ -15,12 +17,13 @@ namespace PrinceQueuing.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<User> _userManager;
-
-        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        private readonly IUnitOfWork _unitOfWork;
+        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IUnitOfWork unitOfWork)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _roleManager = roleManager;
+            _unitOfWork = unitOfWork;
         }
 
         [AllowAnonymous]
@@ -36,7 +39,7 @@ namespace PrinceQueuing.Controllers
                     if (user != null)
                     {
                         var roles = await _userManager.GetRolesAsync(user);
-
+                     
                         if (roles.Contains(SD.Role_Register))
                         {
                             return RedirectToAction("Home", "RegisterPersonnel");
@@ -73,6 +76,16 @@ namespace PrinceQueuing.Controllers
                 {
                     var user = await _userManager.FindByNameAsync(model.Username!);
                     var roles = await _userManager.GetRolesAsync(user!);
+
+                    var deviceId = GetDeviceId();
+
+                    var clerkUser = await _unitOfWork.device.Get(u => u.DeviceId == deviceId);
+                    if (clerkUser != null)
+                    {
+                        clerkUser.UserId = user?.Id;
+                        _unitOfWork.device.Update(clerkUser);
+                        await _unitOfWork.SaveAsync();
+                    }
 
                     if (roles.Contains(SD.Role_Register))
                     {
@@ -167,5 +180,16 @@ namespace PrinceQueuing.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login", "Account");
         }
+
+        private string GetDeviceId()
+        {
+            ManagementObject os = new ManagementObject("Win32_OperatingSystem=@");
+            string deviceId = os["SerialNumber"].ToString()!;
+
+            return deviceId;
+        }
+
+
+
     }
 }

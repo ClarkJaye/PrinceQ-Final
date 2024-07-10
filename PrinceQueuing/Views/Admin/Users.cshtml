@@ -122,7 +122,6 @@
                             <th>UserName</th>
                             <th>Email</th>
                             <th>Role</th>
-                            <th>ClerkNumber</th>
                             <th>Status</th>
                             @* <th>PhoneNumber</th> *@
                             @* <th>Created_at</th> *@
@@ -183,13 +182,6 @@
                         <span asp-validation-for="Role" class="text-danger"></span>
                     </div>
 
-                    <div class="form-floating d-none clerkNumContainer">
-                        <input asp-for="ClerkNumber" class="form-control" placeholder="Sample" />
-                        <label asp-for="ClerkNumber">Clerk Number</label>
-                        <span asp-validation-for="ClerkNumber" class="text-danger"></span>
-                    </div>
-               
-
                     <div class="mt-3 mb-3 text-end">
                         <button type="submit" class="btn btn-primary" id="addBtn">Add</button>
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -205,7 +197,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add User</h5>
+                <h5 class="modal-title">Update User</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -235,12 +227,6 @@
                         <select id="EditRole" name="Role" class="form-select p-3">
                         </select>
                         <span id="RoleValid" class="text-danger"></span>
-                    </div>
-
-                    <div class="form-floating d-none EditClerkNumContainer mb-3">
-                        <input id="EditClerkNumber" name="ClerkNumber" class="form-control" placeholder="Clerk Number" />
-                        <label for="EditClerkNumber">Clerk Number</label>
-                        <span id="ClerkNumberValid" class="text-danger"></span>
                     </div>
 
                     <div class="form-floating mb-3">
@@ -279,8 +265,8 @@
                             <input id="assignUserName" class="form-control" disabled placeholder="Username" />
                         </div>
                         <div class=" mb-3 col-6">
-                            <label>Clerk Number</label>
-                            <input id="assignClerkNumber" class="form-control" disabled placeholder="Clerk Number" />
+                            <label>Email</label>
+                            <input id="assignEmail" class="form-control" disabled placeholder="Email" />
                         </div>
                     </div>
 

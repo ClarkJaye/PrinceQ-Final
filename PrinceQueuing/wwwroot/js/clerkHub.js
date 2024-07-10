@@ -1,7 +1,6 @@
 ﻿//Create Connection
 //var connectionQueueHub = new signalR.HubConnectionBuilder().withUrl("/hubs/queueHub").build();
 var connectionQueueHub = new signalR.HubConnectionBuilder().withUrl("/PrinceQ.DataAccess/hubs/queueHub").build();
-/*GetAllQueueCountNumbers();*/
 
 //From Generate a Number By Register Personnel
 connectionQueueHub.on('UpdateQueueFromPersonnel', () => {
@@ -50,57 +49,48 @@ connectionQueueHub.on("cancelQueueInMenu", () => {
 connectionQueueHub.on("DisplayQueue", function () {
     DisplayCurrentServe();
 });
-
+//For TV Display
+connectionQueueHub.on("DisplayTVQueue", () => {
+    DisplayServeTV();
+})
 
 
 //Display In TV to Remove
 connectionQueueHub.on("QueueDisplayInTvRemove", (value) => {
-    var clerkname = value.toLowerCase();
+    var clerkNumber = value.toLowerCase();
 
-    if (clerkname === 'clerk 1') {
+    if (clerkNumber === 'clerk 1') {
         var display = document.getElementById('TVClerk1');
         display.innerText = "----"
-    } else if (clerkname === 'clerk 2') {
+    } else if (clerkNumber === 'clerk 2') {
         var display = document.getElementById('TVClerk2');
         display.innerText = "----"
-    } else if (clerkname === 'clerk 3') {
+    } else if (clerkNumber === 'clerk 3') {
         var display = document.getElementById('TVClerk3');
         display.innerText = "----"
     }
-
-
-
 })
 
-// Display In TV
-connectionQueueHub.on("QueueNumberDisplayInTV", (value, clerkname) => {
-    if (value) {
-        var display;
-        var categories = {
-            1: "A",
-            2: "B",
-            3: "C",
-            4: "D",
-            5: "E",
-            6: "F"
-        };
+//Display In TV to Remove
+connectionQueueHub.on("CallQueueInTVRed", (value) => {
+    var clerkNumber = value.toLowerCase();
 
-        clerkname = clerkname.toLowerCase();
-
-        if (clerkname === 'clerk 1') {
-            display = document.getElementById('TVClerk1');
-        } else if (clerkname === 'clerk 2') {
-            display = document.getElementById('TVClerk2');
-        } else if (clerkname === 'clerk 3') {
-            display = document.getElementById('TVClerk3');
-        }
-
-        if (display) {
-            var category = categories[value.categoryId] || "----";
-            display.innerText = category + " - " + value.queueNumberServe;
-        }
+    var display;
+    if (clerkNumber === 'clerk 1') {
+        display = document.getElementById('TVClerk1');
+        display.classList.add("blink-red");
+    } else if (clerkNumber === 'clerk 2') {
+        display = document.getElementById('TVClerk2');
+        display.innerText = "----"
+    } else if (clerkNumber === 'clerk 3') {
+        display = document.getElementById('TVClerk3');
+        display.innerText = "----"
     }
-});
+    setTimeout(function () {
+        display.classList.remove("blink-red");
+    }, 3000);
+})
+
 
 function fulfilled() {
     console.log("Connection Successful");

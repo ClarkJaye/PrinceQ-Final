@@ -1,8 +1,7 @@
 ﻿$(document).ready(function () {
-    // NewDayofServing();
+    GetClerkNumber();
     //Display Current Serve
     DisplayCurrentServe();
-    GetClerkNumber();
 
     //Load all Filling Queue
     GetAllFillingQueue();
@@ -69,7 +68,7 @@ function DisplayCurrentServe() {
                     servingDisplay.innerText = "D - " + response.queueNumber;
                 } else {
                     servingDisplay.innerText = "----";
-                }
+                }       
             }
         },
         error: function (error) {
@@ -177,9 +176,14 @@ function CallQueue() {
         dataType: "json",
         success: function (response) {
             if (response && response.isSuccess == true) {
+                var servingDisplay = document.getElementById("servingDisplay");
                 // Play background music
                 playBackgroundMusic();
 
+                servingDisplay.classList.add("blink-red");
+                setTimeout(function () {
+                    servingDisplay.classList.remove("blink-red");
+                }, 3000);
                 button.prop('disabled', true);
                 setTimeout(function () {
                     button.prop('disabled', false);
@@ -434,7 +438,7 @@ function createTableFilling(queue) {
 
     //Button
     var toReleaseButton = $("<button>")
-        .addClass("btn btn-sm btn-primary toReleasingBtn")
+        .addClass("btn btn-primary toReleasingBtn")
         .attr("data-genDate", queue.generateDate)
         .attr("data-category", queue.categId)
         .attr("data-qnumber", queue.qNumber)
@@ -500,6 +504,11 @@ function createTableReleasing(queue, rowIndex) {
             .attr("data-category", queue.categId)
             .attr("data-qnumber", queue.qNumber)
             .text("Serve");
+
+        serveReleaseButton.prop('disabled', true);
+        setTimeout(() => {
+            serveReleaseButton.prop('disabled', false);
+        }, 500);
 
         actionCell.addClass("tableAction d-flex justify-content-center gap-3");
         actionCell.prepend(serveReleaseButton);
@@ -655,3 +664,21 @@ function getCategoryLetter(categoryId) {
             return '';
     }
 }
+
+
+//Display Designated Clerk
+function GetClerkNumber() {
+    $.ajax({
+        url: "/Clerk/DesignatedDeviceId",
+        type: 'GET',
+        success: function (response) {
+            //console.log(response)
+            var clerk = response.device;
+            $('#ClerkNum').text(clerk.clerkNumber);    
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
+}
+

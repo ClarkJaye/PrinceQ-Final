@@ -18,6 +18,5 @@ namespace PrinceQ.DataAccess.Extensions
         {
             return principal.FindFirst(ClaimTypes.Email)!.Value;
         }
-
     }
 }

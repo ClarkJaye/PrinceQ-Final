@@ -14,15 +14,7 @@ $(document).ready(function () {
 
     $("#categoryAssignContainer").on("click", "#removeAssignBtn", RemoveAssign);
 
-    //Display for Clerknumber
-    $("#Role").on("change", function () {
-        var selectedRole = $(this).val();
-        if (selectedRole === "Clerk") {
-            $(".clerkNumContainer").removeClass("d-none");
-        } else {
-            $(".clerkNumContainer").addClass("d-none");
-        }
-    });
+
     //Reset The form
     const userModal = document.getElementById('userAddModal');
     userModal.addEventListener('hidden.bs.modal', function (event) {
@@ -80,7 +72,6 @@ function LoadAllUsers() {
                     value.userName,
                     value.email,
                     value.roles,
-                    value.clerkNumber,
                     `<a class=" btn-sm ${value.isActiveId === 1 ? 'btn-success' : 'btn-danger'} custom-btn-font">${value.isActiveId === 1 ? 'Active' : 'Inactive'}</a>`,
                     buttonsContainer.prop('outerHTML')
                 ];
@@ -104,36 +95,28 @@ function LoadAllUsers() {
 //ADD
 function AddUsers(e) {
     e.preventDefault();
-    var selectedRole = $("#Role").val();
-    var clerkNumber = $("#ClerkNumber").val();
-
-    if (selectedRole === "Clerk" && clerkNumber.trim() === "") {
-        alert("Please enter the Clerk Number.");
-        return false;
-    } else {
-
-        $.ajax({
-            url: '/admin/AddUser',
-            type: 'POST',
-            data: $('#AddUserForm').serialize(),
-            success: function (response) {
-                if (response.isSuccess) {
-                    $('#userAddModal').modal('hide');
-                    LoadAllUsers();
-                    toastr.success(response.message);
-                } else {
-                    var errors = response.errors;
-                    for (var key in errors) {
-                        $('#' + key + '-validation-error').text(errors[key]);
-                    }
+    $.ajax({
+        url: '/admin/AddUser',
+        type: 'POST',
+        data: $('#AddUserForm').serialize(),
+        success: function (response) {
+            if (response.isSuccess) {
+                $('#userAddModal').modal('hide');
+                LoadAllUsers();
+                toastr.success(response.message);
+            } else {
+                var errors = response.errors;
+                for (var key in errors) {
+                    $('#' + key + '-validation-error').text(errors[key]);
                 }
-            },
-            error: function (err) {
-                console.log('Error:', err);
             }
-        });
-    }
+        },
+        error: function (err) {
+            console.log('Error:', err);
+        }
+    });
 }
+
 //EDIT
 function EditUser(id) {
     $.ajax({
@@ -142,45 +125,21 @@ function EditUser(id) {
         dataType: 'json',
         success: function (response) {
             if (response.isSuccess) {
-                $(".EditClerkNumContainer").addClass("d-none");
                 var roleSelect = $('#EditRole');
                 roleSelect.empty();
 
-                roleSelect.append('<option disabled selected>Select Role</option>');
+                roleSelect.append('<option selected>'+ response.user.role[0]+'</option>');
+                roleSelect.append('<option disabled>Select Role</option>');
                 $.each(response.roles, function (i, data) {
-                    roleSelect.append('<option value=' + data.name + '>' + data.name + '</option>');
+                    if (data.name.toLowerCase() !== response.user.role[0].toLowerCase()) {
+                        roleSelect.append('<option value=' + data.name + '>' + data.name + '</option>');
+                    }
                 });
 
                 var user = response.user;
                 $("#EditUserId").val(user.id);
                 $("#EditUserName").val(user.userName);
                 $("#EditEmail").val(user.email);
-
-                var lowercaseRole = user.role[0].toLowerCase();
-                if (lowercaseRole === "clerk") {
-                    $(".EditClerkNumContainer").removeClass("d-none");
-                }
-
-                // Set selected roles
-                $.each(user.role, function (i, role) {
-                    roleSelect.find('option[value="' + role + '"]').prop('selected', true);
-                });
-                // Event listener for role change
-                $(document).on('change', '#EditRole', function () {
-                    var selectedRole = $(this).val().toLowerCase();
-                    if (selectedRole === "clerk") {
-                        $(".EditClerkNumContainer").removeClass("d-none");
-                    } else {
-                        $(".EditClerkNumContainer").addClass("d-none");
-                    }
-                });
-
-                // Set initial visibility of clerkNumContainer
-                if (lowercaseRole === "clerk") {
-                    $("#EditClerkNumber").val(user.clerkNumber);
-                } else {
-                    $("#EditClerkNumber").val("");
-                }
 
             } else {
                 alert(response.message);
@@ -292,7 +251,7 @@ function AssignUser(id) {
             var userCategories = response.userCategories;
             $('#assignUserId').val(user.id);
             $('#assignUserName').val(user.userName);
-            $('#assignClerkNumber').val(user.clerkNumber);
+            $('#assignEmail').val(user.email);
 
             //load all assign categories
             getAssignCategories(user.id);

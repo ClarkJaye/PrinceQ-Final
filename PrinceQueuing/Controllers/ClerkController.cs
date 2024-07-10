@@ -78,7 +78,8 @@ namespace PrinceQueuing.Controllers
             try
             {
                 var userId = GetCurrentUserId();
-                var response = await _clerk.GetServings(userId);
+                var device = GetDeviceId();
+                var response = await _clerk.GetServings(userId, device);
 
                 return Json(response);
             }
@@ -167,7 +168,8 @@ namespace PrinceQueuing.Controllers
             try
             {
                 var userId = GetCurrentUserId();
-                var response = await _clerk.ReserveQueueNumber(userId);
+                var device = GetDeviceId();
+                var response = await _clerk.ReserveQueueNumber(userId, device);
 
                 return Json(response);
             }
@@ -185,7 +187,8 @@ namespace PrinceQueuing.Controllers
             try
             {
                 var userId = GetCurrentUserId();
-                var response = await _clerk.CancelQueueNumber(userId);
+                var device = GetDeviceId();
+                var response = await _clerk.CancelQueueNumber(userId, device);
 
                 return Json(response);
             }

@@ -8,7 +8,7 @@
 
 <div class="customer-body">
     <div class="customer-left" id="clerkContainer">
-        <h1 class="nowServing text-center">Now Serving</h1>
+        <h1 class="nowServing text-center blink-red">Now Serving</h1>
         <div class="clerk1">
             <div class="left">
 
@@ -78,7 +78,7 @@
             <div class="top">
                 <div class="prince-logo">
                     <div class="img-cont">
-                        <img src="~/src/logo-prince.png" />
+                        <img src="~/src/logo-prince.png" class="logoAnimate" />
                     </div>
                 </div>
                 <div class="announcement">
@@ -137,37 +137,6 @@
         $('#date').text(formattedDate);
     };
 
-    // Function for Display Current Serve AND QueuesCount
-    // function DisplayServeTV() {
-    //     $.ajax({
-    //         type: 'GET',
-    //         url: "/Display/GetServings",
-    //         dataType: "json",
-    //         success: function (response) {
-    //             // response.forEach(function (value) {
-    //             //     if (value) {
-    //             //         //clerk
-    //             //         var clerkNumber = value.user.clerkNumber.toLowerCase();
-    //             //         var display = document.getElementById('TVClerk' + clerkNumber.charAt(clerkNumber.length - 1));
-    //             //         var category = value.categoryId;
-
-    //             //         if (display) {
-    //             //             var categoryLetter = getCategoryLetter(category);
-    //             //             var queueNumberServe = value.queueNumberServe !== null ? value.queueNumberServe : "----";
-    //             //             //display
-    //             //             display.innerText = categoryLetter + " - " + queueNumberServe;
-    //             //         }
-    //             //     }
-    //             // });
-    //         },
-    //         error: function (req, status, error) {
-    //             console.log(status);
-    //         }
-    //     });
-    // }
-
-    //Helper
-
     function DisplayServeTV() {
         $.ajax({
             type: 'GET',
@@ -176,25 +145,20 @@
             success: function (response) {
                 console.log(response)
 
-                // Loop through the clerks and display the queue numbers
-                for (var i = 1; i <= 3; i++) {
-                    var clerkNumber = localStorage.getItem("Clerk" + i);
-                    var display = document.getElementById('TVClerk' + i);
+                response.queues.forEach(function (value) {
+                    // console.log(value)
+                    if (value) {
+                        var clerkNumber = response.device[0].clerkNumber.replace("Clerk ", "").trim();
+                        var display = document.getElementById('TVClerk' + clerkNumber);
+                        var category = value.categoryId;
 
-                    if (display && clerkNumber) {
-                        var servedCustomer = response.find(function (item) {
-                            return item.userId === clerkNumber;
-                        });
-
-                        if (servedCustomer) {
-                            var categoryLetter = getCategoryLetter(servedCustomer.categoryId);
-                            var queueNumberServe = servedCustomer.queueNumberServe !== null ? servedCustomer.queueNumberServe : "----";
+                        if (display) {
+                            var categoryLetter = getCategoryLetter(category);
+                            var queueNumberServe = value.queueNumberServe !== null ? value.queueNumberServe : "----";
                             display.innerText = categoryLetter + " - " + queueNumberServe;
-                        } else {
-                            display.innerText = "----";
                         }
                     }
-                }
+                });
             },
             error: function (req, status, error) {
                 console.log(status);

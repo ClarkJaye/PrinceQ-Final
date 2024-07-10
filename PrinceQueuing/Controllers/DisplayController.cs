@@ -28,6 +28,15 @@ namespace PrinceQueuing.Controllers
             return View();
         }
 
+        //public IActionResult AllVideos()
+        //{
+        //    var videoFiles = Directory.GetFiles("wwwroot/Videos")
+        //     .Select(f => f.Replace("wwwroot", string.Empty))
+        //     .ToArray();
+
+        //    return Json(videoFiles);
+        //}
+
         //GET QUEUE
         public async Task<IActionResult> GetServings()
         {
@@ -35,9 +44,10 @@ namespace PrinceQueuing.Controllers
             {
                 var user = await _unitOfWork.users.GetAll();
                 var queueSer = await _unitOfWork.servings.GetAll(u => u.Served_At.Date == DateTime.Today);
+                var clerkNumber = await _unitOfWork.device.GetAll();
                 var queueServe = queueSer.OrderByDescending(q => q.Served_At);
 
-                return Json(queueServe);
+                return Json(new {queues = queueServe, device = clerkNumber});
 
             }
             catch (Exception ex)
@@ -46,9 +56,6 @@ namespace PrinceQueuing.Controllers
             }
 
         }
-
-
-
 
 
     }
