@@ -4,7 +4,7 @@
 }
 
 <partial name="_AdminPartial" />
-
+    
 <div class="px-5 mb-4">
 
     <div class="row py-3">
@@ -16,8 +16,7 @@
                             <div class="fw-bold text-primary text-uppercase mb-1" style="font-size: .8em;">
                                 Total Clerk
                             </div>
-                            <div class="h5 fw-bold text-secondary mb-0">
-                                1500
+                            <div class="h5 fw-bold text-secondary mb-0" id="totalClerk">
                             </div>
                         </div>
                         <div class="col-auto">
@@ -74,7 +73,7 @@
                     <div class="row align-items-center">
                         <div class="col mr-2">
                             <div class="fw-bold text-uppercase mb-1" style="font-size: .8em;">
-                                Average Serve Per/Day
+                                Highest Serve Per/Day
                             </div>
                             <div class="h5 fw-bold text-secondary mb-0">
                                 1500
@@ -160,7 +159,7 @@
         #myChart {
             width: 100% !important;
             height: auto;
-            padding: 10px 30px;
+            /* padding: 10px 30px; */
             /* border: solid 3px rgba(54, 162, 235, 1) !important; */
             background: white;
         }
@@ -175,11 +174,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-tooltip"></script>
 
 <script>
-
-
     $(document).ready(function () {
         loadTotalServing();
         loadPieChart();
+        TotalClerk();
     });
 
 
@@ -201,9 +199,6 @@
             },
         });
     }
-
-
-
 
 
     //Load TotalServing
@@ -333,8 +328,6 @@
         });
     }
 
-
-
     //Plugin
     const plugin = {
         beforeInit(chart) {
@@ -344,6 +337,26 @@
                 this.height += 30;
             }
         }
+    }
+
+    //Total Clerk
+    function TotalClerk(){
+        $.ajax({
+            type: "GET",
+            url: "/admin/CountClerk",
+            success: function (response) {
+                var Clerk = document.getElementById("totalClerk");
+                if (response) {
+                    Clerk.textContent = response;
+                }
+                else{
+                    Clerk.textContent = 0;
+                }
+            },
+            error: function (error) {
+                console.log(error)
+            }
+        })
     }
 
 </script>

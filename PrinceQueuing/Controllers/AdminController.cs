@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using PrinceQ.DataAccess.Extensions;
+using PrinceQ.DataAccess.Hubs;
 using PrinceQ.DataAccess.Repository;
 using PrinceQ.Models.Entities;
 using PrinceQ.Models.ViewModel;
 using PrinceQ.Utility;
-using System.Globalization;
 
 namespace PrinceQueuing.Controllers
 {
@@ -20,13 +21,17 @@ namespace PrinceQueuing.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<User> _userManager;
         private readonly ILogger<AdminController> _logger;
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IHubContext<QueueHub> _hubContext;
 
-        public AdminController(IUnitOfWork unitOfWork, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger<AdminController> logger)
+        public AdminController(IUnitOfWork unitOfWork, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger<AdminController> logger, IWebHostEnvironment webHostEnvironment, IHubContext<QueueHub> hubContext)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _userManager = userManager;
             _roleManager = roleManager;
+            _webHostEnvironment = webHostEnvironment;
+            _hubContext = hubContext;
         }
 
 
@@ -140,7 +145,38 @@ namespace PrinceQueuing.Controllers
         //    return $"{(int)timeSpan.TotalMinutes} minutes and {timeSpan.Seconds} seconds";
         //}
 
+        [HttpGet]
+        public async Task<IActionResult> CountClerk()
+        {
+            try
+            {
+                var users = await _unitOfWork.users.GetAll();
+                var usersWithRole = users.Select(async user =>
+                {
+                    var roles = await _unitOfWork.auth.GetUserRolesAsync(user);
+                    return new
+                    {
+                        user.Id,
+                        user.UserName,
+                        user.Email,
+                        user.PhoneNumber,
+                        user.Created_At,
+                        user.IsActiveId,
+                        Roles = roles
+                    };
+                }).Select(t => t.Result).ToList();
 
+                var clerks = usersWithRole.Where(u => u.Roles.Contains("Clerk")).ToList();
+                var clerkCount = clerks.Count;
+
+                return Json(clerkCount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in CountClerk action");
+                return Json(new { IsSuccess = false, Message = "An error occurred in CountClerk." });
+            }
+        }
 
 
 
@@ -197,6 +233,7 @@ namespace PrinceQueuing.Controllers
             }
 
         }
+
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
@@ -326,15 +363,6 @@ namespace PrinceQueuing.Controllers
             var categories = await _unitOfWork.category.GetAll();
             var userCategories = await _unitOfWork.userCategories.GetAll(uc => uc.UserId == userId);
 
-            //var options = new JsonSerializerOptions
-            //{
-            //    ReferenceHandler = ReferenceHandler.Preserve
-            //};
-
-            //var serializedData = JsonSerializer.Serialize(new { user?.UserName, categories, userCategories }, options);
-
-            //return Content(serializedData, "application/json");
-
             return Json(new { user, categories, userCategories });
         }
 
@@ -388,24 +416,102 @@ namespace PrinceQueuing.Controllers
 
 
 
-
-
-
-
         //-----MANAGE VIDEO-----//
         public IActionResult ManageVideo()
         {
             return View();
         }
 
+        //public IActionResult AllVideos()
+        //{
+        //    var videoFiles = Directory.GetFiles("wwwroot/Videos")
+        //     .Select(f => f.Replace("wwwroot", string.Empty))
+
+        //     .ToArray();
+
+        //    return Json(videoFiles);
+        //}
+
         public IActionResult AllVideos()
         {
-            var videoFiles = Directory.GetFiles("wwwroot/Videos")
-             .Select(f => f.Replace("wwwroot", string.Empty))
-             .ToArray();
+            string[] videoFiles = Directory.GetFiles(Path.Combine(_webHostEnvironment.WebRootPath, "Videos"))
+                .Select(f => new FileInfo(f))
+                .OrderByDescending(f => f.CreationTime)
+                .Select(f => f.FullName.Replace(_webHostEnvironment.WebRootPath, string.Empty))
+                .ToArray();
 
             return Json(videoFiles);
         }
+
+        public async Task<IActionResult> PlayVideo(string videoName)
+        {
+            var videoFilePath = Path.Combine(_webHostEnvironment.WebRootPath, videoName);
+
+            if (System.IO.File.Exists(videoFilePath))
+            {
+                var currentTime = DateTime.Now;
+                System.IO.File.SetCreationTime(videoFilePath, currentTime);
+
+                // Optional: Change modification time as well
+                System.IO.File.SetLastWriteTime(videoFilePath, currentTime);
+
+                // Return the updated video list
+                string[] videoFiles = Directory.GetFiles(Path.Combine(_webHostEnvironment.WebRootPath, "Videos"))
+                    .Select(f => new FileInfo(f))
+                    .OrderByDescending(f => f.CreationTime)
+                    .Select(f => f.FullName.Replace(_webHostEnvironment.WebRootPath, string.Empty))
+                    .ToArray();
+
+                // For REALTIME update
+                await _hubContext.Clients.All.SendAsync("DisplayVideo");
+
+                return Json(new { IsSuccess = true, Message = "Video Play in Monitor.", VideoFiles = videoFiles });
+            }
+
+            return Json(new { IsSuccess = false, Message = "Video file not found." });
+        }
+
+
+
+
+        public IActionResult DeleteVideo(string videoName)
+        {
+            var videoFilePath = Path.Combine("wwwroot/", videoName);
+
+            if (videoFilePath != null)
+            {
+                if (System.IO.File.Exists(videoFilePath))
+                {
+                    System.IO.File.Delete(videoFilePath);
+
+                    return Json(new { IsSuccess = true, Message = "Video Successfully Deleted!" });
+                }
+            }
+            return Json(new { IsSuccess = false, Message = "Video delete failed." });
+        }
+
+
+        [RequestSizeLimit(524288000)]
+        public async Task<IActionResult> UploadVideo(IFormFile videoFile)
+        {
+            if (videoFile != null && videoFile.Length > 0)
+            {
+                var videoDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "Videos");
+                if (!Directory.Exists(videoDirectory))
+                {
+                    Directory.CreateDirectory(videoDirectory);
+                }
+                var videoFilePath = Path.Combine(videoDirectory, videoFile.FileName);
+
+                using (var fileStream = new FileStream(videoFilePath, FileMode.Create))
+                {
+                    await videoFile.CopyToAsync(fileStream);
+                }            
+                return Json(new { IsSuccess = true, Message = "Video Added Successfully." });
+            }
+            return Json(new { IsSuccess = false, Message = "Video add failed." });
+        }
+
 
 
 
@@ -419,8 +525,8 @@ namespace PrinceQueuing.Controllers
 
 
 
-        //-----Clerk RESPORT-----//
-        public IActionResult ClerkReport()
+        //-----Waiting time RESPORT-----//
+        public IActionResult WaitingReport()
         {
             return View();
         }

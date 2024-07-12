@@ -53,6 +53,10 @@ connectionQueueHub.on("DisplayQueue", function () {
 connectionQueueHub.on("DisplayTVQueue", () => {
     DisplayServeTV();
 })
+//For TV Display Video
+connectionQueueHub.on("DisplayVideo", () => {
+    DisplayVideo();
+})
 
 
 //Display In TV to Remove

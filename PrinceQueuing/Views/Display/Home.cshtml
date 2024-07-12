@@ -2,7 +2,7 @@
     ViewData["Title"] = "Display Page";
     Layout = "_DisplayLayout";
 
-    var videoFiles = ViewBag.VideoFiles as string[];
+    // var videoFiles = ViewBag.VideoFiles as string[];
 
 }
 
@@ -61,10 +61,10 @@
         <div class="customer-video">
             <div class="w-100 h-100">
                 <video id="main-video-page2" class="w-100 h-100" preload="auto" style="object-fit:fill;" controls autoplay muted >
-                    @foreach (var videoFile in videoFiles!)
+                   @*  @foreach (var videoFile in videoFiles!)
                     {
                         <source src="@videoFile" type="video/mp4">
-                    }
+                    } *@
                 </video>
 
                 <div class="time">
@@ -103,25 +103,11 @@
 
 <script>
     $(document).ready(function () {
-        var videoPlayer = document.getElementById('main-video-page2');
-        var videoFiles = @Html.Raw(Json.Serialize(videoFiles));
-        // console.log(videoFiles)
-        var videoIndex = 0;
-        videoPlayer.play();
-
-        videoPlayer.addEventListener('ended', function () {
-            videoIndex++;
-            if (videoIndex >= videoFiles.length) {
-                videoIndex = 0;
-            }
-            videoPlayer.src = videoFiles[videoIndex];
-            videoPlayer.play();
-
-        });
-
         //Load Serving
         DisplayServeTV();
-        // Initial display
+        //Load Video
+        DisplayVideo();
+        //Date And Time
         displayDateTime();
         setInterval(displayDateTime, 1000);
     });
@@ -136,14 +122,14 @@
         $('#time').text(formattedTime);
         $('#date').text(formattedDate);
     };
-
+    //Dispaly Serve
     function DisplayServeTV() {
         $.ajax({
             type: 'GET',
             url: "/Display/GetServings",
             dataType: "json",
             success: function (response) {
-                console.log(response)
+                // console.log(response)
 
                 response.queues.forEach(function (value) {
                     // console.log(value)
@@ -165,7 +151,6 @@
             }
         });
     }
-
     function getCategoryLetter(categoryId) {
         var categories = {
             1: "A",
@@ -176,6 +161,38 @@
         return categories[categoryId] || "----";
     }
 
+
+    function DisplayVideo() {
+        $.ajax({
+            type: 'GET',
+            url: '/admin/AllVideos',
+            dataType: 'json',
+            success: function (response) {
+                var videoPlayer = document.getElementById('main-video-page2');
+                var videoFiles = response.map(file => file.replace(/\\/g, '/'));
+                var videoIndex = 0;
+
+                // Set initial video source and play
+                if (videoFiles.length > 0) {
+                    videoPlayer.src = videoFiles[videoIndex];
+                    videoPlayer.play();
+                }
+
+                // Add event listener for when the video ends
+                videoPlayer.addEventListener('ended', function () {
+                    videoIndex++;
+                    if (videoIndex >= videoFiles.length) {
+                        videoIndex = 0;
+                    }
+                    videoPlayer.src = videoFiles[videoIndex];
+                    videoPlayer.play();
+                });
+            },
+            error: function (error) {
+                console.log("Error loading videos: ", error);
+            }
+        });
+    }
 
 </script>
 

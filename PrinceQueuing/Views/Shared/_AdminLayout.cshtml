@@ -20,10 +20,10 @@
 <body>
       <div class="wrapper">
         @* <aside id="sidebar" class="expand"> *@
-        <aside id="sidebar" class="">
+        <aside id="sidebar">
             <div class="d-flex">
                 <button class="toggle-btn">
-                    <img src="~/Audio/logo.png" alt="" width="40" height="40" class="rounded-circle me-3">
+                    <a asp-controller="Admin" asp-action="Dashboard"><img src="~/Audio/logo.png" alt="" width="40" height="40" class="rounded-circle me-3"></a>
                 </button>
                 <div class="sidebar-logo">
                     <a asp-controller="Admin" asp-action="Dashboard">PrinceQ</a>
@@ -43,12 +43,15 @@
                         <span>Reports</span>
                     </a>
                     <ul id="auth" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                       
+                        <li class="sidebar-item">
+                            <a asp-controller="Admin" asp-action="WaitingReport" class="sidebar-link">Waiting Time Statistics</a>
+                        </li>
+
                         <li class="sidebar-item">
                             <a asp-controller="Admin" asp-action="ServingReport" class="sidebar-link">Serving Statistics</a>
                         </li>
-                        <li class="sidebar-item">
-                            <a asp-controller="Admin" asp-action="ClerkReport" class="sidebar-link">Clerk Statistics</a>
-                        </li>
+
                     </ul>
                 </li>
 

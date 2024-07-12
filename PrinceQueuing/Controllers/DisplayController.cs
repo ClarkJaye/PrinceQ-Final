@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using PrinceQ.DataAccess.Hubs;
 using PrinceQ.DataAccess.Repository;
@@ -10,24 +11,38 @@ namespace PrinceQueuing.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHubContext<QueueHub> _hubContext;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public DisplayController(IUnitOfWork unitOfWork, IHubContext<QueueHub> hubContext)
+        public DisplayController(IUnitOfWork unitOfWork, IHubContext<QueueHub> hubContext, IWebHostEnvironment webHostEnvironment)
         {
             _unitOfWork = unitOfWork;
             _hubContext = hubContext;
+            _webHostEnvironment = webHostEnvironment;
         }
+
+        //public IActionResult Home()
+        //{
+        //    var videoFiles = Directory.GetFiles("wwwroot/Videos")
+        //   .Select(f => f.Replace("wwwroot", string.Empty))
+        //   .ToArray();
+
+        //    ViewBag.VideoFiles = videoFiles;
+
+        //    return View();
+        //}
 
         public IActionResult Home()
         {
-            var videoFiles = Directory.GetFiles("wwwroot/Videos")
-           .Select(f => f.Replace("wwwroot", string.Empty))
-           .ToArray();
+            string[] videoFiles = Directory.GetFiles(Path.Combine(_webHostEnvironment.WebRootPath, "Videos"))
+                .Select(f => new FileInfo(f))
+                .OrderByDescending(f => f.CreationTime)
+                .Select(f => f.FullName.Replace(_webHostEnvironment.WebRootPath, string.Empty))
+                .ToArray();
 
             ViewBag.VideoFiles = videoFiles;
 
             return View();
         }
-
         //public IActionResult AllVideos()
         //{
         //    var videoFiles = Directory.GetFiles("wwwroot/Videos")
