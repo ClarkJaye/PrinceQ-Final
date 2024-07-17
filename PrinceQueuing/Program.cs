@@ -30,6 +30,7 @@ builder.Services.AddDetection();
 // Register the repositories
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IClerk, ClerkService>();
+builder.Services.AddScoped<IAdmin, AdminService>();
 builder.Services.AddScoped<IRegisterPersonnel, RegisterPersonnelService>();
 builder.Services.AddSignalR();
 
@@ -61,7 +62,6 @@ app.MapControllerRoute(
     name: "default",
      pattern: "{controller=Account}/{action=Login}/{id?}");
 
-//app.MapHub<QueueHub>("/hubs/queueHub");
 app.MapHub<QueueHub>("/PrinceQ.DataAccess/hubs/queueHub");
 
 app.Run();

@@ -57,15 +57,18 @@ function DisplayCurrentServe() {
         url: "/Clerk/GetServings",
         dataType: "json",
         success: function (response) {
+            var categoryId = response.categoryId;
+            var queueNumber = response.queueNumber;
+
             if (response != null) {
-                if (response.categoryId === 1) {
-                    servingDisplay.innerText = "A - " + response.queueNumber;
-                } else if (response.categoryId === 2) {
-                    servingDisplay.innerText = "B - " + response.queueNumber;
-                } else if (response.categoryId === 3) {
-                    servingDisplay.innerText = "C - " + response.queueNumber;
-                } else if (response.categoryId === 4) {
-                    servingDisplay.innerText = "D - " + response.queueNumber;
+                if (categoryId === 1) {
+                    servingDisplay.innerText = "A - " + queueNumber;
+                } else if (categoryId === 2) {
+                    servingDisplay.innerText = "B - " + queueNumber;
+                } else if (categoryId === 3) {
+                    servingDisplay.innerText = "C - " + queueNumber;
+                } else if (categoryId === 4) {
+                    servingDisplay.innerText = "D - " + queueNumber;
                 } else {
                     servingDisplay.innerText = "----";
                 }       
@@ -77,53 +80,16 @@ function DisplayCurrentServe() {
     });
 }
 
-//Display Designated Clerk
-function GetClerkNumber() {
-    $.ajax({
-        url: "/Clerk/DesignatedDeviceId",
-        type: 'GET',
-        success: function (response) {
-            console.log(response)
-            var clerk = response.device;
-            var user = response.user;
-            $('#ClerkNum').text(clerk.clerkNumber);
-
-            // Trim the clerk number
-            var clerkNumber = clerk.clerkNumber.replace("Clerk ", "").trim();
-            var storageKey = "Clerk" + clerkNumber;
-
-            // Remove all existing user IDs stored in localStorage
-            for (let i = 0; i < localStorage.length; i++) {
-                let key = localStorage.key(i);
-                if (key.startsWith("Clerk")) {
-                    // Check if the key matches the current clerk number
-                    if (key !== storageKey) {
-                        localStorage.removeItem(key);
-                    }
-                }
-            }
-
-            // Store the new user ID
-            localStorage.setItem(storageKey, user.id)
-        },
-        error: function (error) {
-            console.log(error);
-        }
-    });
-}
-
 // Function to get the next queue number
 function getNextQueueNumber() {
     var button = $(this);
     var callBtn = $('#callBtn');
     var categoryId = button.attr('id');
-/*    var prevQueue = JSON.parse(localStorage.getItem('queueItem'));*/
 
     $.ajax({
         type: 'GET',
         url: "/Clerk/NextQueue",
         dataType: "json",
-        //data: { id: categoryId, prevQueue: JSON.stringify(prevQueue) },
         data: { id: categoryId },
         success: function (response) {
             var queue = response.obj;
@@ -135,9 +101,6 @@ function getNextQueueNumber() {
                 }, 1000)
             }
             else {
-                // Store the Queue Object into local storage
-/*                localStorage.setItem('queueItem', JSON.stringify(queue));*/
-
                 // Play background music
                 playBackgroundMusic();
 
@@ -673,7 +636,7 @@ function GetClerkNumber() {
         type: 'GET',
         success: function (response) {
             //console.log(response)
-            var clerk = response.device;
+            var clerk = response.obj1;
             $('#ClerkNum').text(clerk.clerkNumber);    
         },
         error: function (error) {

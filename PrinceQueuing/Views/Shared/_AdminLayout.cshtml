@@ -7,12 +7,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - PrinceQueuing</title>
+    <link rel="icon" type="image/x-icon" href="/src/logo-prince.png">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/PrinceQueuing.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.lineicons.com/4.0/lineicons.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="/lib/dist/virtual-select.min.css" />
 
 
@@ -72,6 +74,13 @@
                     <a asp-controller="Admin" asp-action="ManageVideo" class="sidebar-link">
                         <i class="lni lni-video"></i>
                         <span>Manage Video</span>
+                    </a>
+                </li>
+
+                <li class="sidebar-item">
+                    <a asp-controller="Admin" asp-action="Announcement" class="sidebar-link">
+                        <i class="fa fa-bullhorn"></i>
+                        <span>Announcement</span>
                     </a>
                 </li>
             </ul>

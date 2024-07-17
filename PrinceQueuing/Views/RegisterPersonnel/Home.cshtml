@@ -171,8 +171,8 @@
 
                 if (response && response.isSuccess) {
                     // Handle success
-                    var queueItem = response.queue;
-                    var category = response.category;
+                    var queueItem = response.obj1;
+                    var category = response.obj2;
                     var queueNumber;
 
                     $('#modalCategoryName').text(category.categoryName);

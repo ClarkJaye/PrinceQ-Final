@@ -29,10 +29,10 @@ function getAllVideos() {
         url: '/Admin/AllVideos',
         dataType: 'json',
         success: function (response) {
-            //console.log(response);
-            if (response.length > 0) {
+            if (response) {
                 let videoContainer = '';
-                response.forEach(function (videoFile, index) {
+                var videos = response.result.videoFiles;
+                videos.forEach(function (videoFile, index) {
                     let fileName = videoFile.split('/').pop();
 
                     let vidName = videoFile.split("\\");
@@ -102,7 +102,6 @@ function deleteVideo() {
                         $('#selected-video').attr('src', '');
                         $('#selected-video').removeAttr('vid-selected');
                         $(`.videoInList[data-video-src='${videoName}']`).remove();
-        
 
                         if (response.isSuccess) {
                             toastr.success(response.message);

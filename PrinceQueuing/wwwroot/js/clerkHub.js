@@ -57,6 +57,10 @@ connectionQueueHub.on("DisplayTVQueue", () => {
 connectionQueueHub.on("DisplayVideo", () => {
     DisplayVideo();
 })
+//For TV Display Announcement
+connectionQueueHub.on("LoadAnnouncement", () => {
+    loadAnnouncement();
+})
 
 
 //Display In TV to Remove

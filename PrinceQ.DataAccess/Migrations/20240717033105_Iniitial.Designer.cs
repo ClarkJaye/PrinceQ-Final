@@ -12,8 +12,8 @@ using PrinceQ.DataAccess.Data.Context;
 namespace PrinceQ.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240710084759_Update_device")]
-    partial class Update_device
+    [Migration("20240717033105_Iniitial")]
+    partial class Iniitial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -213,16 +213,25 @@ namespace PrinceQ.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("Created_At")
+                    b.Property<DateTime?>("Created_At")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2(7)")
+                        .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETDATE()");
 
-                    b.Property<string>("Message")
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("IsActiveId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IsActiveId");
 
                     b.ToTable("Announcement");
                 });
@@ -860,6 +869,15 @@ namespace PrinceQ.DataAccess.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("PrinceQ.Models.Entities.Announcement", b =>
+                {
+                    b.HasOne("PrinceQ.Models.Entities.IsActive", "IsActive")
+                        .WithMany()
+                        .HasForeignKey("IsActiveId");
+
+                    b.Navigation("IsActive");
                 });
 
             modelBuilder.Entity("PrinceQ.Models.Entities.Category", b =>

@@ -5,7 +5,7 @@ namespace PrinceQ.DataAccess.Interfaces
     public interface IRegisterPersonnel
     {
         Task<GeneralResponse> HomeVM();
-        Task<MultiResponse> GenerateQueue(int categoryId);
+        Task<DualResponse> GenerateQueue(int categoryId);
         Task<GeneralResponse> GetQueue(string date, int categoryId, int queueNumber);
 
 

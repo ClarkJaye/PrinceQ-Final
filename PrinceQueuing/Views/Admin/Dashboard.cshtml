@@ -6,7 +6,6 @@
 <partial name="_AdminPartial" />
     
 <div class="px-5 mb-4">
-
     <div class="row py-3">
         <div class="col-xl-3 col-md-3 col-sm-4 mb-4">
             <div class="card shadow h-100 py-2" style="border-left: .25rem solid #4e73df !important;">
@@ -75,8 +74,7 @@
                             <div class="fw-bold text-uppercase mb-1" style="font-size: .8em;">
                                 Highest Serve Per/Day
                             </div>
-                            <div class="h5 fw-bold text-secondary mb-0">
-                                1500
+                            <div class="h5 fw-bold text-secondary mb-0" id="highestServed">                            
                             </div>
                         </div>
                         <div class="col-auto">
@@ -87,26 +85,11 @@
             </div>
         </div>
     </div>
-
-
     <div class="row">
         <div class="col-8">
             <div class="bg-white rounded border shadow">
                 <h6 class="p-3 fw-bold m-0 border-bottom">Total Serving</h6>
                 <div class="d-flex align-items-center justify-content-end pt-3 px-5">
-
-                   @*  <div class="d-flex align-items-center gap-2">
-                        <select id="selectedRangeType" class="form-select">
-                            <option value="Filling">Generation to For Filling</option>
-                            <option value="Releasing">For Filling to Releasing</option>
-                            <option value="FillingToReleasing" selected>Generation to Releasing</option>
-                        </select>
-                    </div>
-
-                    <div class="month-Container">
-                        <h1 id="monthSelect">All</h1>
-                    </div> *@
-
                     <div class="yearContainer d-flex gap-2">
                         <select id="selectedYear" onchange="LoadData(this.value,  document.getElementById('selectedMonth').value)" class="form-select">
                             <option value="2024">2024</option>
@@ -117,7 +100,6 @@
                             <option value="2029">2029</option>
                             <option value="2030">2030</option>
                         </select>
-
                         <select id="selectedMonth" onchange="LoadData(document.getElementById('selectedYear').value, this.value)" class="form-select">
                             <option data-month="All" value="">All</option>
                             <option data-month="January" value="01">January</option>
@@ -135,14 +117,11 @@
                         </select>
                     </div>
                 </div>
-
                 <div class="pb-5 mx-3">
                     <canvas id="myChart"></canvas>
                 </div>
             </div>
-
         </div>
-
         <div class="col-4">
             <div class="bg-white rounded border shadow">
                 <h6 class="p-3 fw-bold m-0 border-bottom"> Serving Statistics</h6>
@@ -152,19 +131,7 @@
                 
             </div>
         </div>
-
     </div>
-
-    <style>
-        #myChart {
-            width: 100% !important;
-            height: auto;
-            /* padding: 10px 30px; */
-            /* border: solid 3px rgba(54, 162, 235, 1) !important; */
-            background: white;
-        }
-    </style>
-
 </div>
 
 
@@ -178,6 +145,7 @@
         loadTotalServing();
         loadPieChart();
         TotalClerk();
+        highestServed();
     });
 
 
@@ -358,5 +326,28 @@
             }
         })
     }
+
+    //Total Clerk
+    function highestServed() {
+        $.ajax({
+            type: "GET",
+            url: "/admin/HighestServePerDay",
+            success: function (response) {
+               console.log(response)
+                var highestServed = document.getElementById("highestServed");
+                if (response) {
+                    highestServed.textContent = response.value.category.sum;
+                }
+                else {
+                    highestServed.textContent = 0;
+                }
+            },
+            error: function (error) {
+                console.log(error)
+            }
+        })
+    }
+
+
 
 </script>

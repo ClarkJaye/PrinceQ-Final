@@ -73,18 +73,13 @@ namespace PrinceQ.DataAccess.Services
         {
             var servingData = await _unitOfWork.servings.Get(u => u.UserId == userId && u.Served_At.Date == DateTime.Today);
 
-            if (servingData != null)
-            {
-                var device = await _unitOfWork.device.Get(d => d.DeviceId == deviceId);
-                var clerkNum = device?.ClerkNumber;
-                //signalr method
-                await _hubContext.Clients.All.SendAsync("CallQueueInTVRed", clerkNum);
-                return new GetResponse(true, servingData.CategoryId, servingData.QueueNumberServe, "Success");
-            }
-            else
-            {
-                return new GetResponse(false, null, null, "There is no QueueNumber");
-            }
+            if (servingData is null) return new GetResponse(false, null, null, "There is no QueueNumber");
+
+            var device = await _unitOfWork.device.Get(d => d.DeviceId == deviceId);
+            var clerkNum = device?.ClerkNumber;
+
+            await _hubContext.Clients.All.SendAsync("CallQueueInTVRed", clerkNum);
+            return new GetResponse(true, servingData.CategoryId, servingData.QueueNumberServe, "Success");
         }
 
         //GET RESERVE QUEUENUMBER
@@ -158,6 +153,7 @@ namespace PrinceQ.DataAccess.Services
         }
 
         //HELPER
+
         //Helper for Reserve
         private string GetCategoryString(int categoryId)
         {
@@ -300,9 +296,6 @@ namespace PrinceQ.DataAccess.Services
                     servingData.Served_At = DateTime.Now;
 
                     _unitOfWork.servings.Update(servingData);
-                    //await _hubContext.Clients.All.SendAsync("QueueNumberDisplayInTV", servingData, clerk?.ClerkNumber);
-                    //await _hubContext.Clients.All.SendAsync("DisplayTVQueue");
-
                 }
                 else
                 {
@@ -315,14 +308,11 @@ namespace PrinceQ.DataAccess.Services
                     };
 
                     _unitOfWork.servings.Add(serving);
-                    //await _hubContext.Clients.All.SendAsync("QueueNumberDisplayInTV", serving, clerk?.ClerkNumber);
-                    //await _hubContext.Clients.All.SendAsync("DisplayTVQueue");
                 }
 
                 if(queueItem.StageId == 1)
                 {
                     await UpdateClerkServeForFilling(userId, (int)queueItem.CategoryId!, (int)queueItem.QueueNumber);
-
                 }
                 else if(queueItem.StageId == 2)
                 {
@@ -450,7 +440,6 @@ namespace PrinceQ.DataAccess.Services
                 return new GeneralResponse(false, null, "There is an error occurred.");
             }
         }
-
 
         ////// -------------QUEUE IN TABLES-------------- //////
 

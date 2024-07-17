@@ -6,6 +6,28 @@
     Layout = "_AdminLayout";
 }
 
+
+<style>
+    table tbody tr:hover {
+        background-color: rgba(0, 0, 0, .05);
+    }
+
+    #multipleSelect {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .vscomp-toggle-button {
+        padding: 10px 30px 10px 10px;
+        border-radius: 5px;
+    }
+
+    .custom-btn-font {
+        font-size: 10px;
+        border-radius: 20px;
+    }
+</style>
+
 <!--For Navbar-->
 <partial name="_AdminPartial" />
 
@@ -73,7 +95,6 @@
         </div>
     </div>
 
-
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 fw-bold text-dark">
@@ -100,8 +121,6 @@
                             <th>Email</th>
                             <th>Role</th>
                             <th>Status</th>
-                            @* <th>PhoneNumber</th> *@
-                            @* <th>Created_at</th> *@
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
@@ -109,33 +128,9 @@
                 </table>
             </div>
         </div>
-
-
     </div>
 
 </div>
-
-
-<style>
-    table tbody tr:hover {
-        background-color: rgba(0, 0, 0, .05);
-    }
-
-    #multipleSelect {
-        max-width: 100%;
-        width: 100%;
-    }
-
-    .vscomp-toggle-button {
-        padding: 10px 30px 10px 10px;
-        border-radius: 5px;
-    }
-
-    .custom-btn-font {
-        font-size: 10px;
-        border-radius: 20px;
-    }
-</style>
 
 <!-- Add Modal -->
 <div class="modal fade" id="userAddModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -292,12 +287,13 @@
     </div>
 </div>
 
+
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
-
 <script src="~/lib/dist//virtual-select.min.js"></script>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="/js/admin/UserScript.js"></script>

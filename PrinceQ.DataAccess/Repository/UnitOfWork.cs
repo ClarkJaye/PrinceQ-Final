@@ -12,6 +12,7 @@ namespace PrinceQ.DataAccess.Repository
         private RoleManager<IdentityRole> _roleManager;
 
         public IAuthRepo auth{ get; private set; }
+        public IAnnounceRepo announcement { get; private set; }
         public IDeviceRepo device { get; private set; }
         public ICategoryRepo category { get; private set; }
         public IClerkForFillingRepo clerkForFilling { get; private set; }
@@ -20,6 +21,8 @@ namespace PrinceQ.DataAccess.Repository
         public IServingRepo servings{ get; private set; }
         public IUserCategoryRepo userCategories { get; private set; }
         public IUsersRepo users { get; private set; }
+        public IActiveRepo active { get; private set; }
+
 
         public UnitOfWork(AppDbContext db, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
@@ -27,6 +30,7 @@ namespace PrinceQ.DataAccess.Repository
             _userManager = userManager;
             _roleManager = roleManager;
             auth = new AuthRepo(_db, _userManager, _roleManager);
+            announcement = new AnnounceRepo(_db);
             device = new DeviceRepo(_db);
             category = new CategoryRepo(_db);
             queueNumbers = new QueueNumberRepo(_db);
@@ -35,6 +39,7 @@ namespace PrinceQ.DataAccess.Repository
             users = new UsersRepo(_db);
             clerkForFilling = new ClerkForFillingRepo(_db);
             clerkReleasing = new ClerkReleasingRepo(_db);
+            active = new ActiveRepo(_db);
 
         }
 

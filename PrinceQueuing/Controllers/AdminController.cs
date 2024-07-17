@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using PrinceQ.DataAccess.Hubs;
+using PrinceQ.DataAccess.Interfaces;
 using PrinceQ.DataAccess.Repository;
 using PrinceQ.Models.Entities;
 using PrinceQ.Models.ViewModel;
@@ -14,33 +12,28 @@ using PrinceQ.Utility;
 namespace PrinceQueuing.Controllers
 {
     [Authorize(Roles = SD.Role_Admin)]
-
     public class AdminController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly UserManager<User> _userManager;
         private readonly ILogger<AdminController> _logger;
-        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IHubContext<QueueHub> _hubContext;
 
-        public AdminController(IUnitOfWork unitOfWork, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, ILogger<AdminController> logger, IWebHostEnvironment webHostEnvironment, IHubContext<QueueHub> hubContext)
+        private readonly IAdmin _admin;
+
+        public AdminController(IAdmin admin, IUnitOfWork unitOfWork, ILogger<AdminController> logger, IHubContext<QueueHub> hubContext)
         {
+            _admin = admin;
+
             _unitOfWork = unitOfWork;
             _logger = logger;
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _webHostEnvironment = webHostEnvironment;
             _hubContext = hubContext;
         }
-
 
         //-----DASHBOARD-----//
         public IActionResult Dashboard()
         {
             return View();
         }
-
         [HttpGet]
         public async Task<IActionResult> GetDataByYearAndMonth(string year, string month)
         {
@@ -49,7 +42,7 @@ namespace PrinceQueuing.Controllers
                 if (year != null && month == null)
                 {
                     // Retrieve monthly data
-                    var data = await _unitOfWork.queueNumbers.GetAll(d => d.StatusId == 2 && d.QueueId!.Substring(0, 4) == year);
+                    var data = await _unitOfWork.queueNumbers.GetAll(d => d.StageId != null && d.QueueId!.Substring(0, 4) == year);
                     var monthlyData = data
                         .GroupBy(item => item.QueueId!.Substring(4, 2))
                         .Select(g => new
@@ -66,7 +59,7 @@ namespace PrinceQueuing.Controllers
                 }
                 else if (year != null && month != null)
                 {
-                    var data = await _unitOfWork.queueNumbers.GetAll(d => d.StatusId == 2 && d.QueueId!.Substring(0, 6) == year + month);
+                    var data = await _unitOfWork.queueNumbers.GetAll(d => d.StageId != null && d.QueueId!.Substring(0, 6) == year + month);
                     var dailyData = data
                         .GroupBy(item => item.QueueId!.Substring(6, 2))
                         .Select(g => new
@@ -93,58 +86,6 @@ namespace PrinceQueuing.Controllers
                 return Json(new { IsSuccess = false, message = "An error occurred in GetDataByYearAndMonth." });
             }
         }
-
-
-        //[HttpGet]
-        //public async Task<IActionResult> LoadData(string year, string month)
-        //{
-        //    try
-        //    {
-        //        if (year != null && month == null)
-        //        {
-        //            var data = await _unitOfWork.queueNumbers.GetAll(d =>
-        //                d.StatusId == 2 &&
-        //                d.QueueId!.Substring(0, 4) == year &&
-        //                d.ForFilling_start.HasValue &&
-        //                d.ForFilling_end.HasValue);
-
-        //            var monthlyData = data
-        //                .GroupBy(item => item.CategoryId)
-        //                .Select(g => new
-        //                {
-        //                    CategoryId = g.Key,
-        //                    //AverageForFillingTimeInMinutes = (int)(g.Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds) / 60),
-        //                    AverageForFillingTimeInMinutesAndSeconds = FormatTimeSpan(g.Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds))
-        //                })
-        //                .ToList();
-
-        //            return Json(new { ByMonth = true, value = monthlyData });
-        //        }
-        //        else
-        //        {
-        //            return Json(null);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Error in LoadData action");
-        //        return Json(new { IsSuccess = false, message = "An error occurred in LoadData." });
-        //    }
-        //}
-        //private string FormatTimeSpan(double totalSeconds)
-        //{
-        //    var timeSpan = TimeSpan.FromSeconds(totalSeconds);
-        //    int minutes = (int)timeSpan.TotalMinutes;
-        //    double seconds = timeSpan.Seconds + (timeSpan.Milliseconds / 1000.0);
-        //    return $"{(int)minutes}.{(int)seconds:00}";
-        //}
-
-        //private string FormatTimeSpan(double totalSeconds)
-        //{
-        //    var timeSpan = TimeSpan.FromSeconds(totalSeconds);
-        //    return $"{(int)timeSpan.TotalMinutes} minutes and {timeSpan.Seconds} seconds";
-        //}
-
         [HttpGet]
         public async Task<IActionResult> CountClerk()
         {
@@ -177,54 +118,81 @@ namespace PrinceQueuing.Controllers
                 return Json(new { IsSuccess = false, Message = "An error occurred in CountClerk." });
             }
         }
+        [HttpGet]
+        public async Task<IActionResult> HighestServePerDay()
+        {
+            try
+            {
+                var year = DateTime.Now.Year.ToString();
+                var data = await _unitOfWork.queueNumbers.GetAll(d => d.StageId != null && d.QueueId!.Substring(0, 4) == year);
+
+                var highestServed = data
+                    .GroupBy(item => item.QueueId!.Substring(0, 8)) // Group by year-month-day (YYYYMMDD)
+                    .Select(g => new
+                    {
+                        Date = g.Key,
+                        CategoryASum = g.Count(i => i.CategoryId == 1),
+                        CategoryBSum = g.Count(i => i.CategoryId == 2),
+                        CategoryCSum = g.Count(i => i.CategoryId == 3),
+                        CategoryDSum = g.Count(i => i.CategoryId == 4)
+                    })
+                    .Select(g => new
+                    {
+                        g.Date,
+                        Category = new[]
+                        {
+                    new { Name = "Category A", Sum = g.CategoryASum },
+                    new { Name = "Category B", Sum = g.CategoryBSum },
+                    new { Name = "Category C", Sum = g.CategoryCSum },
+                    new { Name = "Category D", Sum = g.CategoryDSum }
+                        }.OrderByDescending(c => c.Sum).FirstOrDefault()
+                    })
+                    .OrderByDescending(x => x.Category!.Sum) 
+                    .FirstOrDefault();
+
+                return Json(new { IsSuccess = true, value = highestServed });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in HighestServePerDay action");
+                return Json(new { IsSuccess = false, Message = "An error occurred in HighestServePerDay." });
+            }
+        }
 
 
 
 
         //-----USERS-----//
-
-
-        public IActionResult Users()
+        public async Task<IActionResult> Users()
         {
-            var roles = _unitOfWork.auth.GetAllRoles();
-
-            var roleList = roles.Select(x => new SelectListItem
+            var response = await _admin.UserPage();
+            if (response.IsSuccess)
             {
-                Text = x.Name,
-                Value = x.Name
-            });
-
-            var model = new RegisterVM
-            {
-                RoleList = roleList
-            };
-
-            return View(model);
+                return View(response.Obj);
+            }
+            return RedirectToAction("Login", "Account");
         }
-
         [HttpGet]
         public async Task<IActionResult> GetUser(string? id)
         {
             try
             {
-                var userToBeEdit = await _unitOfWork.users.Get(u => u.Id == id);
-                //var roles = await _userManager.GetRolesAsync(userToBeEdit!);
-
-                if (userToBeEdit == null) return Json(new { IsSuccess = false, Message = "Error occurred while getting the User" });
-                var userRole = await _userManager.GetRolesAsync(userToBeEdit);
-
-                var user = new
-                {
-                    id = userToBeEdit.Id,
-                    userName = userToBeEdit.UserName,
-                    email = userToBeEdit.Email,
-                    role = userRole,
-                    isActive = userToBeEdit.IsActive,
-                };
-
-                var roles = await _roleManager.Roles.ToListAsync();
-
-                return Json(new { IsSuccess = true, user, roles, Message = "User get successful" });
+                var response = await _admin.UserDetail(id);
+                return Json(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetUser action");
+                return Json(new { IsSuccess = false, message = "An error occurred in GetUser." });
+            }
+        }      
+        [HttpDelete]
+        public async Task<IActionResult> RemoveUser(string? id)
+        {
+            try
+            {
+                var response = await _admin.DeleteUser(id);
+                return Json(response);
             }
             catch (Exception ex)
             {
@@ -233,37 +201,13 @@ namespace PrinceQueuing.Controllers
             }
 
         }
-
         [HttpGet]
         public async Task<IActionResult> GetAllUsers()
         {
             try
             {
-                var users = await _unitOfWork.users.GetAll();
-                var usersWithRole = users.Select(async user =>
-                {
-                    var roles = await _unitOfWork.auth.GetUserRolesAsync(user);
-                    return new
-                    {
-                        user.Id,
-                        user.UserName,
-                        user.Email,
-                        user.PhoneNumber,
-                        user.Created_At,
-                        user.IsActiveId,
-                        Roles = roles
-                    };
-                }).Select(t => t.Result).ToList();
-
-                // Sort the users based on their roles
-                var sortedUsers = usersWithRole.OrderByDescending(u => u.Roles.Contains("Clerk"))
-                                              .ThenByDescending(u => u.Roles.Contains("RegisterPersonnel"))
-                                              .ThenByDescending(u => u.Roles.Contains("Admin"))
-                                              .ThenBy(u => u.Created_At)
-                                              .ToList();
-
-                if (sortedUsers == null) return Json(new { IsSuccess = false, Message = "Retrieved users failed." });
-                return Json(new { IsSuccess = true, data = sortedUsers });
+                var response = await _admin.AllUsers();
+                return Json(response);
             }
             catch (Exception ex)
             {
@@ -272,7 +216,6 @@ namespace PrinceQueuing.Controllers
             }
 
         }
-
         [HttpPost]
         public async Task<IActionResult> AddUser(UserVM model)
         {
@@ -280,24 +223,8 @@ namespace PrinceQueuing.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    User user = new()
-                    {
-                        UserName = model.UserName,
-                        Email = model.Email,
-                        IsActiveId = 1
-                    };
-
-                    var result = await _userManager.CreateAsync(user, model.Password);
-
-                    if (result.Succeeded)
-                    {
-                        if (!String.IsNullOrEmpty(model.Role))
-                        {
-                            await _userManager.AddToRoleAsync(user, model.Role);
-                        }
-                    }
-                    await _unitOfWork.SaveAsync();
-                    return Json(new { IsSuccess = true, Message = "User added successfully" });
+                    var response = await _admin.AddUser(model);
+                    return Json(response);
                 }
                 return Json(new { IsSuccess = false, Message = "Add user failed!" });
             }
@@ -307,7 +234,6 @@ namespace PrinceQueuing.Controllers
                 return Json(new { IsSuccess = false, Message = "An error occurred in AddUsers." });
             }
         }
-
         [HttpPost]
         public async Task<IActionResult> UpdateUser(UserVM model)
         {
@@ -315,36 +241,8 @@ namespace PrinceQueuing.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    User user = await _userManager.FindByIdAsync(model.Id);
-
-                    if (user != null)
-                    {
-                        user.UserName = model.UserName;
-                        user.Email = model.Email;
-                        user.IsActiveId = (int)model.IsActiveId!;
-
-                        if (!String.IsNullOrEmpty(model.Password))
-                        {
-                            var newPasswordHash = _userManager.PasswordHasher.HashPassword(user, model.Password);
-                            user.PasswordHash = newPasswordHash;
-                        }
-
-                        // Remove user from all existing roles
-                        var existingRoles = await _userManager.GetRolesAsync(user);
-                        await _userManager.RemoveFromRolesAsync(user, existingRoles);
-
-                        if (!String.IsNullOrEmpty(model.Role))
-                        {
-                            await _userManager.AddToRoleAsync(user, model.Role);
-                        }
-
-                        await _unitOfWork.SaveAsync();
-                        return Json(new { IsSuccess = true, Message = "User updated successfully" });
-                    }
-                    else
-                    {
-                        return Json(new { IsSuccess = false, Message = "User not found" });
-                    }
+                    var response = await _admin.UpdateUser(model);
+                    return Json(response);
                 }
 
                 return Json(new { IsSuccess = false, Message = "Update User failed!" });
@@ -355,65 +253,30 @@ namespace PrinceQueuing.Controllers
                 return Json(new { IsSuccess = false, Message = "An error occurred in UpdateUser." });
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> UserCategories(string? userId)
         {
-            var user = await _unitOfWork.users.Get(u => u.Id == userId);
-            var categories = await _unitOfWork.category.GetAll();
-            var userCategories = await _unitOfWork.userCategories.GetAll(uc => uc.UserId == userId);
-
-            return Json(new { user, categories, userCategories });
+            var response = await _admin.UserCategory(userId);
+            return Json(response);
         }
-
         [HttpGet]
         public async Task<IActionResult> GetAssignCategories(string? userId)
         {
-            var user = await _unitOfWork.users.Get(u => u.Id == userId);
-            var categories = await _unitOfWork.category.GetAll();
-            var userCategories = await _unitOfWork.userCategories.GetAll(uc => uc.UserId == userId);
-
-            return Json(userCategories);
+            var response = await _admin.GetAssignCategory(userId);
+            return Json(response);
         }
         [HttpPost]
         public async Task<IActionResult> AddAssignUserCategories(int[] categoryId, string userId)
         {
-            if (categoryId.Length == 0 || userId == null)
-            {
-                return Json(new { IsSuccess = false, Message = "User assign failed." });
-            }
-            var existingUserCategories = await _unitOfWork.userCategories.GetAll(c => c.UserId == userId);
-
-            foreach (int catId in categoryId)
-            {
-                if (!existingUserCategories.Any(uc => uc.CategoryId == catId))
-                {
-                    User_Category userCat = new User_Category()
-                    {
-                        CategoryId = catId,
-                        UserId = userId
-                    };
-                    _unitOfWork.userCategories.Add(userCat);
-                }
-            }
-            await _unitOfWork.SaveAsync();
-            return Json(new { IsSuccess = true, Message = "User assign successful." });
+            var response = await _admin.AddAssignUserCategories(categoryId, userId);
+            return Json(response);
         }
-
         [HttpPost]
         public async Task<IActionResult> RemoveAssignUserCategories(int categoryId, string userId)
         {
-            if (categoryId == 0 || userId == null)
-            {
-                return Json(new { IsSuccess = false, Message = "User remove failed." });
-            }
-            var userCategory = await _unitOfWork.userCategories.Get(uc => uc.CategoryId == categoryId && uc.UserId == userId);
-
-            _unitOfWork.userCategories.Remove(userCategory!);
-            await _unitOfWork.SaveAsync();
-            return Json(new { IsSuccess = true, Message = "User remove successful." });
+            var response = await _admin.RemoveAssignUserCategories(categoryId, userId);
+            return Json(response);
         }
-
 
 
         //-----MANAGE VIDEO-----//
@@ -421,97 +284,30 @@ namespace PrinceQueuing.Controllers
         {
             return View();
         }
-
-        //public IActionResult AllVideos()
-        //{
-        //    var videoFiles = Directory.GetFiles("wwwroot/Videos")
-        //     .Select(f => f.Replace("wwwroot", string.Empty))
-
-        //     .ToArray();
-
-        //    return Json(videoFiles);
-        //}
-
+        [AllowAnonymous]
         public IActionResult AllVideos()
         {
-            string[] videoFiles = Directory.GetFiles(Path.Combine(_webHostEnvironment.WebRootPath, "Videos"))
-                .Select(f => new FileInfo(f))
-                .OrderByDescending(f => f.CreationTime)
-                .Select(f => f.FullName.Replace(_webHostEnvironment.WebRootPath, string.Empty))
-                .ToArray();
-
-            return Json(videoFiles);
+            var response = _admin.AllVideos();
+            return Json(response);
         }
-
+        [HttpGet]
         public async Task<IActionResult> PlayVideo(string videoName)
         {
-            var videoFilePath = Path.Combine(_webHostEnvironment.WebRootPath, videoName);
-
-            if (System.IO.File.Exists(videoFilePath))
-            {
-                var currentTime = DateTime.Now;
-                System.IO.File.SetCreationTime(videoFilePath, currentTime);
-
-                // Optional: Change modification time as well
-                System.IO.File.SetLastWriteTime(videoFilePath, currentTime);
-
-                // Return the updated video list
-                string[] videoFiles = Directory.GetFiles(Path.Combine(_webHostEnvironment.WebRootPath, "Videos"))
-                    .Select(f => new FileInfo(f))
-                    .OrderByDescending(f => f.CreationTime)
-                    .Select(f => f.FullName.Replace(_webHostEnvironment.WebRootPath, string.Empty))
-                    .ToArray();
-
-                // For REALTIME update
-                await _hubContext.Clients.All.SendAsync("DisplayVideo");
-
-                return Json(new { IsSuccess = true, Message = "Video Play in Monitor.", VideoFiles = videoFiles });
-            }
-
-            return Json(new { IsSuccess = false, Message = "Video file not found." });
+            var response = await _admin.PlayVideo(videoName);
+            return Json(response);
         }
-
-
-
-
-        public IActionResult DeleteVideo(string videoName)
+        [HttpPost]
+        public async Task<IActionResult> DeleteVideo(string videoName)
         {
-            var videoFilePath = Path.Combine("wwwroot/", videoName);
-
-            if (videoFilePath != null)
-            {
-                if (System.IO.File.Exists(videoFilePath))
-                {
-                    System.IO.File.Delete(videoFilePath);
-
-                    return Json(new { IsSuccess = true, Message = "Video Successfully Deleted!" });
-                }
-            }
-            return Json(new { IsSuccess = false, Message = "Video delete failed." });
+            var response = await _admin.DeleteVideo(videoName);
+            return Json(response);
         }
-
-
         [RequestSizeLimit(524288000)]
         public async Task<IActionResult> UploadVideo(IFormFile videoFile)
         {
-            if (videoFile != null && videoFile.Length > 0)
-            {
-                var videoDirectory = Path.Combine(_webHostEnvironment.WebRootPath, "Videos");
-                if (!Directory.Exists(videoDirectory))
-                {
-                    Directory.CreateDirectory(videoDirectory);
-                }
-                var videoFilePath = Path.Combine(videoDirectory, videoFile.FileName);
-
-                using (var fileStream = new FileStream(videoFilePath, FileMode.Create))
-                {
-                    await videoFile.CopyToAsync(fileStream);
-                }            
-                return Json(new { IsSuccess = true, Message = "Video Added Successfully." });
-            }
-            return Json(new { IsSuccess = false, Message = "Video add failed." });
+            var response = await _admin.UploadVideo(videoFile);
+            return Json(response);
         }
-
 
 
 
@@ -520,9 +316,132 @@ namespace PrinceQueuing.Controllers
         {
             return View();
         }
+        [HttpGet]
+        public async Task<IActionResult> GetClerks_Categories()
+        {
+            try
+            {
+                var categ = await _unitOfWork.category.GetAll();
+                var categories = categ.OrderBy(c => c.Created_At).ToList();
+                var users = await _unitOfWork.users.GetAll();
+                var clerks = new List<dynamic>();
 
+                foreach (var user in users)
+                {
+                    var roles = await _unitOfWork.auth.GetUserRolesAsync(user);
+                    if (roles.Contains("Clerk") || roles.Contains("clerk"))
+                    {
+                        clerks.Add(new
+                        {
+                            user.Id,
+                            user.UserName,
+                            user.Email,
+                            user.PhoneNumber,
+                            user.Created_At,
+                            user.IsActiveId,
+                            Roles = roles
+                        });
+                    }
+                }
 
+                if (clerks == null) return Json(new { IsSuccess = false, Message = "Retrieved clerks failed." });
 
+                // Sort the clerks based on their Created_At
+                var sortedClerks = clerks.OrderBy(c => c.Created_At).ToList();
+
+                return Json(new { IsSuccess = true, clerks = sortedClerks, categories });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetAllClerks action");
+                return Json(new { IsSuccess = false, message = "An error occurred in GetAllClerks." });
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetServingDataClerk(string clerkId, string year, string month)
+        {
+            try
+            {
+                if (clerkId != null && year != null && month == null)
+                {
+                    var data = await _unitOfWork.clerkForFilling.GetAll(d => d.ClerkId == clerkId && d.GenerateDate!.Substring(0, 4) == year);
+                    var monthlyData = data
+                        .GroupBy(item => item.GenerateDate!.Substring(4, 2))
+                        .Select(g => new
+                        {
+                            Month = g.Key,
+                            CategoryASum = g.Count(i => i.CategoryId == 1),
+                            CategoryBSum = g.Count(i => i.CategoryId == 2),
+                            CategoryCSum = g.Count(i => i.CategoryId == 3),
+                            CategoryDSum = g.Count(i => i.CategoryId == 4),
+                        })
+                        .ToList();
+                    return Json(new { ByMonth = true, value = monthlyData });
+                }
+                else if (clerkId == null && year != null && month == null)
+                {
+                    var data = await _unitOfWork.clerkForFilling.GetAll(d => d.GenerateDate!.Substring(0, 4) == year);
+                    var monthlyData = data
+                        .GroupBy(item => item.GenerateDate!.Substring(4, 2))
+                        .Select(g => new
+                        {
+                            Month = g.Key,
+                            CategoryASum = g.Count(i => i.CategoryId == 1),
+                            CategoryBSum = g.Count(i => i.CategoryId == 2),
+                            CategoryCSum = g.Count(i => i.CategoryId == 3),
+                            CategoryDSum = g.Count(i => i.CategoryId == 4),
+                        })
+                        .ToList();
+                    return Json(new { ByMonth = true, value = monthlyData });
+                }
+                else if (clerkId != null && year != null && month != null)
+                {
+                    var data = await _unitOfWork.clerkForFilling.GetAll(d => d.ClerkId == clerkId && d.GenerateDate!.Substring(0, 6) == year + month);
+                    var dailyData = data
+                        .GroupBy(item => item.GenerateDate!.Substring(6, 2))
+                        .Select(g => new
+                        {
+                            Day = g.Key,
+                            CategoryASum = g.Count(i => i.CategoryId == 1),
+                            CategoryBSum = g.Count(i => i.CategoryId == 2),
+                            CategoryCSum = g.Count(i => i.CategoryId == 3),
+                            CategoryDSum = g.Count(i => i.CategoryId == 4),
+                            GenerateDate = g.Select(i => i.GenerateDate).FirstOrDefault()
+                        })
+                        .ToList();
+                    return Json(new { ByMonth = false, value = dailyData });
+                }
+                else if (clerkId == null && year != null && month != null)
+                {
+                    // example data of generateDate = "20240626"
+                    var data = await _unitOfWork.clerkForFilling.GetAll(d => d.GenerateDate!.Substring(0, 6) == year + month);
+                    var dailyData = data
+                        .GroupBy(item => item.GenerateDate!.Substring(6, 2))
+                        .Select(g => new
+                        {
+                            Day = g.Key,
+                            CategoryASum = g.Count(i => i.CategoryId == 1),
+                            CategoryBSum = g.Count(i => i.CategoryId == 2),
+                            CategoryCSum = g.Count(i => i.CategoryId == 3),
+                            CategoryDSum = g.Count(i => i.CategoryId == 4),
+                            GenerateDate = g.Select(i => i.GenerateDate).FirstOrDefault()
+                        })
+                        .ToList();
+
+                    return Json(new { ByMonth = false, value = dailyData });
+
+                }
+                else
+                {
+                    return Json(null);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetServingDataClerk action");
+                return Json(new { IsSuccess = false, message = "An error occurred in GetServingDataClerk." });
+            }
+        }
 
 
         //-----Waiting time RESPORT-----//
@@ -530,12 +449,148 @@ namespace PrinceQueuing.Controllers
         {
             return View();
         }
+        public async Task<IActionResult> GetAllWaitingTimeData(string year, string month)
+        {
+            try
+            {
+                if (year != null && month == null)
+                {
+                    var data = await _unitOfWork.queueNumbers.GetAll(d =>
+                        d.StatusId == 2 &&
+                        d.QueueId!.Substring(0, 4) == year &&
+                        d.ForFilling_start.HasValue &&
+                        d.ForFilling_end.HasValue);
+
+                    var monthlyData = data
+                        .GroupBy(item => item.CategoryId)
+                        .Select(g => new
+                        {
+                            CategoryId = g.Key,
+                            //AverageForFillingTimeInMinutes = (int)(g.Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds) / 60),
+                            AverageSpan= FormatTimeSpan(g.Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds))
+                        })
+                        .ToList();
+
+                    return Json(new { ByMonth = true, value = monthlyData });
+                }
+                else
+                {
+                    return Json(null);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetUser action");
+                return Json(new { IsSuccess = false, message = "An error occurred in GetUser." });
+            }
+        }
+        private string FormatTimeSpan(double totalSeconds)
+        {
+            var timeSpan = TimeSpan.FromSeconds(totalSeconds);
+            return $"{(int)timeSpan.TotalMinutes} minutes and {timeSpan.Seconds} seconds";
+        }
 
 
 
+        //-----Announcement-----//
+        public IActionResult Announcement()
+        {
+            return View();
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAnnouncement(int? id)
+        {
+            try
+            {
+                var response = await _admin.AnnouncementDetail(id);
+                return Json(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetAnnouncement action");
+                return Json(new { IsSuccess = false, message = "An error occurred in GetAnnouncement." });
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetAllAnnouncement()
+        {
+            try
+            {
+                var response = await _admin.AllAnnouncement();
+                return Json(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetAllAnnouncement action");
+                return Json(new { IsSuccess = false, message = "An error occurred in GetAllAnnouncement." });
+            }
 
+        }
+        [HttpPost]
+        public async Task<IActionResult> AddAnnounce(Announcement model)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var response = await _admin.AddAnnouncement(model);
+                    return Json(response);
+                }
+                return Json(new { IsSuccess = false, Message = "Add Announcement failed!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Announcement action");
+                return Json(new { IsSuccess = false, Message = "An error occurred in Announcement." });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> UpdateAnnouncement(Announcement model)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var response = await _admin.UpdateAnnouncement(model);
+                    return Json(response);
+                }
+                return Json(new { IsSuccess = false, Message = "updated Announcement failed!" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetUser action");
+                return Json(new { IsSuccess = false, message = "An error occurred in GetUser." });
+            }
 
-
+        }
+        [HttpDelete]
+        public async Task<IActionResult> DeleteAnnouncement(int? id)
+        {
+            try
+            {
+                var response = await _admin.DeleteAnnouncement(id);
+                return Json(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteAnnouncement action");
+                return Json(new { IsSuccess = false, message = "An error occurred in DeleteAnnouncement." });
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetTotalAnnounce()
+        {
+            try
+            {
+                var response = await _admin.GetTotalAnnounce();
+                return Json(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in DeleteAnnouncement action");
+                return Json(new { IsSuccess = false, message = "An error occurred in DeleteAnnouncement." });
+            }
+        }
 
 
 

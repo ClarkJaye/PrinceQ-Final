@@ -186,5 +186,8 @@ a.sidebar-link:hover {
     transition: all .2s ease-out;
 }
 
-
+.custom-btn-font {
+    font-size: 12px;
+    border-radius: 20px;
+}
 

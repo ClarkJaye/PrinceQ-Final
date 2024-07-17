@@ -184,12 +184,14 @@
 .advertisement .announcement {
     width: 80%;
     height: 100%;
+    padding-right: 3rem;
 }
 
 .announcement h2 {
     margin-top: 2%;
     text-align: center;
-    font-size: clamp(1rem, 2vw, 2rem);
+    font-size: clamp(1rem, 2vw, 2.2rem);
+    font-style: italic;
 }
 
 .announcement .announcement-words {
@@ -202,7 +204,7 @@
 
     .announcement .announcement-words p {
         line-height: normal;
-        font-size: clamp(.5rem, 2vw, 1.5rem);
+        font-size: clamp(1rem, 2vw, 2rem);
     }
 
 

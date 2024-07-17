@@ -20,17 +20,6 @@ namespace PrinceQueuing.Controllers
             _webHostEnvironment = webHostEnvironment;
         }
 
-        //public IActionResult Home()
-        //{
-        //    var videoFiles = Directory.GetFiles("wwwroot/Videos")
-        //   .Select(f => f.Replace("wwwroot", string.Empty))
-        //   .ToArray();
-
-        //    ViewBag.VideoFiles = videoFiles;
-
-        //    return View();
-        //}
-
         public IActionResult Home()
         {
             string[] videoFiles = Directory.GetFiles(Path.Combine(_webHostEnvironment.WebRootPath, "Videos"))
@@ -43,14 +32,6 @@ namespace PrinceQueuing.Controllers
 
             return View();
         }
-        //public IActionResult AllVideos()
-        //{
-        //    var videoFiles = Directory.GetFiles("wwwroot/Videos")
-        //     .Select(f => f.Replace("wwwroot", string.Empty))
-        //     .ToArray();
-
-        //    return Json(videoFiles);
-        //}
 
         //GET QUEUE
         public async Task<IActionResult> GetServings()
@@ -70,6 +51,17 @@ namespace PrinceQueuing.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
 
+        }
+
+
+        //GET Announcement
+        public async Task<IActionResult> GetAnnouncement()
+        {
+            var announce = await _unitOfWork.announcement.Get(a => a.IsActiveId == 1);
+
+            if (announce == null) return Json(new { IsSuccess = false });
+
+            return Json(new { IsSuccess = true, announce });
         }
 
 

@@ -8,25 +8,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PrinceQ.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class Iniitial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "Announcement",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Created_At = table.Column<DateTime>(type: "datetime2(7)", nullable: false, defaultValueSql: "GETDATE()")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Announcement", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -39,18 +25,6 @@ namespace PrinceQ.DataAccess.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetRoles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Device",
-                columns: table => new
-                {
-                    DeviceId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ClerkNumber = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Device", x => x.DeviceId);
                 });
 
             migrationBuilder.CreateTable(
@@ -112,6 +86,27 @@ namespace PrinceQ.DataAccess.Migrations
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Announcement",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsActiveId = table.Column<int>(type: "int", nullable: true),
+                    Created_At = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "GETDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Announcement", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Announcement_IsActive_IsActiveId",
+                        column: x => x.IsActiveId,
+                        principalTable: "IsActive",
+                        principalColumn: "IsActiveId");
                 });
 
             migrationBuilder.CreateTable(
@@ -251,6 +246,24 @@ namespace PrinceQ.DataAccess.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Device",
+                columns: table => new
+                {
+                    DeviceId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ClerkNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Device", x => x.DeviceId);
+                    table.ForeignKey(
+                        name: "FK_Device_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -416,8 +429,8 @@ namespace PrinceQ.DataAccess.Migrations
 
             migrationBuilder.InsertData(
                 table: "Device",
-                columns: new[] { "DeviceId", "ClerkNumber" },
-                values: new object[] { "00330-71344-74698-AAOEM", "Clerk 1" });
+                columns: new[] { "DeviceId", "ClerkNumber", "UserId" },
+                values: new object[] { "00330-71344-74698-AAOEM", "Clerk 1", null });
 
             migrationBuilder.InsertData(
                 table: "IsActive",
@@ -504,6 +517,11 @@ namespace PrinceQ.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Announcement_IsActiveId",
+                table: "Announcement",
+                column: "IsActiveId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
@@ -571,6 +589,11 @@ namespace PrinceQ.DataAccess.Migrations
                 name: "IX_Clerk_Serve_Releasing_ClerkId",
                 table: "Clerk_Serve_Releasing",
                 column: "ClerkId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Device_UserId",
+                table: "Device",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_QueueNumbers_CategoryId",

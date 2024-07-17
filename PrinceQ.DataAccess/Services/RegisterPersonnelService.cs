@@ -32,9 +32,9 @@ namespace PrinceQ.DataAccess.Services
         }
 
         //Generate Qeuue Temporary
-        public async Task<MultiResponse> GenerateQueue(int categoryId)
+        public async Task<DualResponse> GenerateQueue(int categoryId)
         {
-            if(categoryId == 0) return new MultiResponse(false, null, null, "there is no an error!");
+            if(categoryId == 0) return new DualResponse(false, null, null, "there is no an error!");
 
             var currentDate = DateTime.Today.ToString("yyyyMMdd");
             var selectedCategory = await _unitOfWork.category.Get(c => c.CategoryId == categoryId);
@@ -57,7 +57,7 @@ namespace PrinceQ.DataAccess.Services
             await _unitOfWork.SaveAsync();
             await _hubContext.Clients.All.SendAsync("UpdateQueueFromPersonnel");
 
-            return new MultiResponse(true, queueNumber, selectedCategory, "Generation successful");
+            return new DualResponse(true, queueNumber, selectedCategory, "Generation successful");
         }
 
         //Get Queue

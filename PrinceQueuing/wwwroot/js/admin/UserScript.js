@@ -1,18 +1,18 @@
 ﻿var dataTable;
 $(document).ready(function () {
-    LoadAllUsers();
+    loadAllUsers();
 
     $("#AddUserForm").on("submit", function (e) {
-        AddUsers(e);
+        addUsers(e);
     });
 
     $("#UpdateUserForm").on("submit", function (e) {
-        UpdateUser(e);
+        updateUser(e);
     });
 
-    $("#addAssignBtn").on("click", AddAssign);
+    $("#addAssignBtn").on("click", addAssign);
 
-    $("#categoryAssignContainer").on("click", "#removeAssignBtn", RemoveAssign);
+    $("#categoryAssignContainer").on("click", "#removeAssignBtn", removeAssign);
 
 
     //Reset The form
@@ -34,38 +34,43 @@ function formatDate(date) {
     return date.toLocaleString('en-US', options).toUpperCase();
 }
 //Load Tables
-function LoadAllUsers() {
+function loadAllUsers() {
     $.ajax({
         url: '/admin/GetAllUsers',
         type: 'GET',
         async: false,
         success: function (response) {
-            var categoryData = response.data.map(function (value) {
+            var categoryData = response.obj.map(function (value) {
                 var formattedDateTime = formatDate(new Date(value.created_At));
 
                 var assignButton = $('<button>')
                     .addClass('btn btn-sm btn-warning d-flex align-items-center gap-1')    
-                    .attr('onclick', `AssignUser('${value.id}')`)
+                    .attr('onclick', `assignUser('${value.id}')`)
                     .html('<i class="lni lni-checkmark-circle mr-2"></i><span>Assign</span>');
 
                 var editButton = $('<button>')
                     .addClass('btn btn-sm btn-primary d-flex align-items-center gap-1')
-                    .attr('onclick', `EditUser('${value.id}')`)
+                    .attr('onclick', `editUser('${value.id}')`)
                     .html('<i class="lni lni-pencil mr-2"></i><span>Edit</span>');
 
                 var detailsButton = $('<button>')
                     .addClass('btn btn-sm btn-secondary d-flex align-items-center gap-1')
-                    .attr('onclick', `DetailUser('${value.id}')`)
+                    .attr('onclick', `detailUser('${value.id}')`)
                     .html('<i class="lni lni-folder mr-2"></i><span> Details </span>');
+
+                var removeButton = $('<button>')
+                    .addClass('btn btn-sm btn-danger d-flex align-items-center gap-1')
+                    .attr('onclick', `removeUser('${value.id}')`)
+                    .html('<i class="lni lni-trash-can mr-2"></i><span> Delete </span>');
 
                 var buttonsContainer = $('<div>').addClass('d-flex align-items-center float-end gap-2');
 
                 if (Array.isArray(value.roles) && value.roles.some(role => role.toLowerCase() === "clerk")) {
                     //buttonsContainer.append(assignButton, editButton, detailsButton);
-                    buttonsContainer.append(assignButton, editButton);
+                    buttonsContainer.append(assignButton, editButton, removeButton);
                 } else {
                     //buttonsContainer.append(editButton, detailsButton);
-                    buttonsContainer.append(editButton);
+                    buttonsContainer.append(editButton, removeButton);
                 }
 
                 return [
@@ -93,7 +98,7 @@ function LoadAllUsers() {
     });
 }
 //ADD
-function AddUsers(e) {
+function addUsers(e) {
     e.preventDefault();
     $.ajax({
         url: '/admin/AddUser',
@@ -102,7 +107,7 @@ function AddUsers(e) {
         success: function (response) {
             if (response.isSuccess) {
                 $('#userAddModal').modal('hide');
-                LoadAllUsers();
+                loadAllUsers();
                 toastr.success(response.message);
             } else {
                 var errors = response.errors;
@@ -118,17 +123,18 @@ function AddUsers(e) {
 }
 
 //EDIT
-function EditUser(id) {
+function editUser(id) {
     $.ajax({
         url: "/admin/GetUser?id=" + id,
         type: "GET",
         dataType: 'json',
         success: function (response) {
             if (response.isSuccess) {
+                var user = response.user;
                 var roleSelect = $('#EditRole');
                 roleSelect.empty();
 
-                roleSelect.append('<option selected>'+ response.user.role[0]+'</option>');
+                roleSelect.append('<option selected>'+ user.role[0]+'</option>');
                 roleSelect.append('<option disabled>Select Role</option>');
                 $.each(response.roles, function (i, data) {
                     if (data.name.toLowerCase() !== response.user.role[0].toLowerCase()) {
@@ -136,7 +142,6 @@ function EditUser(id) {
                     }
                 });
 
-                var user = response.user;
                 $("#EditUserId").val(user.id);
                 $("#EditUserName").val(user.userName);
                 $("#EditEmail").val(user.email);
@@ -154,7 +159,7 @@ function EditUser(id) {
 }
 
 //UPDATE
-function UpdateUser(e) {
+function updateUser(e) {
     e.preventDefault();
     console.log($('#UpdateUserForm').serialize())
 
@@ -176,7 +181,7 @@ function UpdateUser(e) {
                 success: function (response) {
                     console.log(response)
                     if (response && response.isSuccess) {
-                        LoadAllUsers();
+                        loadAllUsers();
                         toastr.success(response.message)
                     }
                     else {
@@ -193,6 +198,39 @@ function UpdateUser(e) {
         }
     });
 }
+
+//REMOVE
+function removeUser(id) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type: 'DELETE',
+                url: "/Admin/RemoveUser?id=" + id,
+                dataType: 'json',
+                success: function (response) {
+                    if (response) {
+                        loadAllUsers();
+                        toastr.success(response.message);
+                    } else {
+                        toastr.error(response.message);
+                    }
+                },
+                error: function () {
+                    console.log('Unable to get the data.');
+                }
+            })
+        }
+    });
+}
+
 //GET AssignCategories
 function getAssignCategories(id) {
     $.ajax({
@@ -203,7 +241,7 @@ function getAssignCategories(id) {
         contentType: 'application/json',
         success: function (response) {
             //Assign 
-            var userCategories = response;
+            var userCategories = response.userCategories;
             var assignCont = $("#categoryAssignContainer");
 
             // Clear the container before adding new content
@@ -238,7 +276,7 @@ function createList(data) {
     return li;
 }
 // ASSIGN
-function AssignUser(id) {
+function assignUser(id) {
     $.ajax({
         type: 'GET',
         url: '/Admin/UserCategories',
@@ -312,7 +350,7 @@ function AssignUser(id) {
     });
 }
 //ADD ASSIGN
-function AddAssign() {
+function addAssign() {
     var categoryId = $('#multipleSelect').val();
     var userId = $('#assignUserId').val();
 
@@ -340,7 +378,7 @@ function AddAssign() {
     });
 }
 //REMOVE ASSIGN
-function RemoveAssign() {
+function removeAssign() {
     Swal.fire({
         title: "Are you sure?",
         text: "You won't be able to revert this!",

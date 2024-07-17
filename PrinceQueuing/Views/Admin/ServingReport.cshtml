@@ -22,8 +22,7 @@
                             <div class="fw-bold text-primary text-uppercase mb-1" style="font-size: .8em;">
                                 Total Clerk
                             </div>
-                            <div class="h5 fw-bold text-secondary mb-0">
-                                1500
+                            <div class="h5 fw-bold text-secondary mb-0" id="totalClerk">                               
                             </div>
                         </div>
                         <div class="col-auto">
@@ -77,11 +76,11 @@
 
 
     <div class="bg-white rounded border shadow">
-        <h6 class="p-3 fw-bold m-0 border-bottom">Serving Statistics</h6>
+        <h6 class="p-3 fw-bold m-0 border-bottom">Serving</h6>
         <div class="d-flex align-items-center justify-content-between p-2 px-5">
             
             <div class="d-flex align-items-center gap-2">
-                <select id="selectedClerk" onchange="LoadData( this.value, document.getElementById('selectedYear').value, document.getElementById('selectedMonth').value)" class="form-select">
+                <select id="selectedClerk" onchange="LoadServeData( this.value, document.getElementById('selectedYear').value, document.getElementById('selectedMonth').value)" class="form-select">
                     <option value="" selected disabled>select clerk</option>
                     <option value="">All</option>
                 </select>
@@ -93,7 +92,7 @@
             </div>
 
             <div class="yearContainer d-flex gap-2">
-                <select id="selectedYear" onchange="LoadData(document.getElementById('selectedClerk').value, this.value,  document.getElementById('selectedMonth').value)" class="form-select">
+                <select id="selectedYear" onchange="LoadServeData(document.getElementById('selectedClerk').value, this.value,  document.getElementById('selectedMonth').value)" class="form-select">
                     <option value="2024">2024</option>
                     <option value="2025">2025</option>
                     <option value="2026">2026</option>
@@ -103,7 +102,7 @@
                     <option value="2030">2030</option>
                 </select>
 
-                <select id="selectedMonth" onchange="LoadData(document.getElementById('selectedClerk').value, document.getElementById('selectedYear').value, this.value)" class="form-select">
+                <select id="selectedMonth" onchange="LoadServeData(document.getElementById('selectedClerk').value, document.getElementById('selectedYear').value, this.value)" class="form-select">
                     <option data-month="All" value="">All</option>
                     <option data-month="January" value="01">January</option>
                     <option data-month="February" value="02">February</option>
@@ -119,24 +118,14 @@
                     <option data-month="December" value="12">December</option>
                 </select>
             </div>
+
+
         </div>
 
         <div class="pb-5 mx-5">
-            <canvas id="myChart"></canvas>
+            <canvas id="servedChart"></canvas>
         </div>
     </div>
-
-
-    <style>
-        #myChart {
-            width: 100% !important;
-            height: auto;
-            padding: 30px;
-            border-radius: 20px;
-            border: solid 3px rgba(54, 162, 235, 1) !important;
-            background: white;
-        }
-    </style>
 
 </div>
 
@@ -144,6 +133,6 @@
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-tooltip"></script>
-<script src="/js/admin/ReportScript.js"></script>
+<script src="/js/admin/ServingReportScript.js"></script>
 
 
