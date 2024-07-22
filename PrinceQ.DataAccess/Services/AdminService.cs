@@ -80,6 +80,7 @@ namespace PrinceQ.DataAccess.Services
         public async Task<UserRolesResponse> UserDetail(string? id)
         {
             var userToBeEdit = await _unitOfWork.users.Get(u => u.Id == id);
+            var activeList = await _unitOfWork.active.GetAll();
             if (userToBeEdit == null) return new UserRolesResponse(false, null, null, "Get user detail failed.");
             var userRole = await _userManager.GetRolesAsync(userToBeEdit);
             var user = new
@@ -88,7 +89,8 @@ namespace PrinceQ.DataAccess.Services
                 userName = userToBeEdit.UserName,
                 email = userToBeEdit.Email,
                 role = userRole,
-                isActive = userToBeEdit.IsActive,
+                isActive = userToBeEdit.IsActiveId,
+                active = activeList,
             };
             var roles = await _roleManager.Roles.ToListAsync();
             return new UserRolesResponse(true, user, roles, "User get successful");

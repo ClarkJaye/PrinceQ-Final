@@ -342,7 +342,7 @@ function GetAllQueueCountNumbers(id) {
                         button.prop('disabled', true);
                         setTimeout(() => {
                             button.prop('disabled', false);
-                        }, 1000);
+                        }, 200);
                     }
 
                     var div = $('<div>')
@@ -471,7 +471,7 @@ function createTableReleasing(queue, rowIndex) {
         serveReleaseButton.prop('disabled', true);
         setTimeout(() => {
             serveReleaseButton.prop('disabled', false);
-        }, 500);
+        }, 200);
 
         actionCell.addClass("tableAction d-flex justify-content-center gap-3");
         actionCell.prepend(serveReleaseButton);

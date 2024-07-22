@@ -1,7 +1,7 @@
 ﻿var dataTable;
 $(document).ready(function () {
     loadAllUsers();
-
+    LoadAllCard();
     $("#AddUserForm").on("submit", function (e) {
         addUsers(e);
     });
@@ -108,6 +108,7 @@ function addUsers(e) {
             if (response.isSuccess) {
                 $('#userAddModal').modal('hide');
                 loadAllUsers();
+                LoadAllCard();
                 toastr.success(response.message);
             } else {
                 var errors = response.errors;
@@ -132,7 +133,9 @@ function editUser(id) {
             if (response.isSuccess) {
                 var user = response.user;
                 var roleSelect = $('#EditRole');
+                var activeSelect = $('#EditActive');
                 roleSelect.empty();
+                activeSelect.empty();
 
                 roleSelect.append('<option selected>'+ user.role[0]+'</option>');
                 roleSelect.append('<option disabled>Select Role</option>');
@@ -142,14 +145,21 @@ function editUser(id) {
                     }
                 });
 
+                var activeText = user.isActive == 1 ? "Active" : "InActive";
+                activeSelect.append('<option selected>' + activeText + '</option>');
+                $.each(user.active, function (i, data) {
+                    if (data.name.toLowerCase() !== activeText.toLowerCase()) {
+                        activeSelect.append('<option value=' + data.isActiveId + '>' + data.name + '</option>');
+                    }
+                });
+
                 $("#EditUserId").val(user.id);
                 $("#EditUserName").val(user.userName);
                 $("#EditEmail").val(user.email);
-
+                LoadAllCard();
             } else {
                 alert(response.message);
             }
-
             $('#userEditModal').modal('show');
         },
         error: function (err) {
@@ -161,8 +171,6 @@ function editUser(id) {
 //UPDATE
 function updateUser(e) {
     e.preventDefault();
-    console.log($('#UpdateUserForm').serialize())
-
     Swal.fire({
         title: "Are you sure?",
         text: "You won't be able to revert this!",
@@ -179,9 +187,9 @@ function updateUser(e) {
                 data: $('#UpdateUserForm').serialize(),
                 dataType: 'json',
                 success: function (response) {
-                    console.log(response)
                     if (response && response.isSuccess) {
                         loadAllUsers();
+                        LoadAllCard();
                         toastr.success(response.message)
                     }
                     else {
@@ -218,6 +226,7 @@ function removeUser(id) {
                 success: function (response) {
                     if (response) {
                         loadAllUsers();
+                        LoadAllCard();
                         toastr.success(response.message);
                     } else {
                         toastr.error(response.message);
@@ -410,4 +419,21 @@ function removeAssign() {
             })
         }
     });
+}
+function LoadAllCard() {
+
+    $.ajax({
+        url: "/admin/GetUserCounts",
+        type: "GET",
+        dataType: 'json',
+        success: function (response) {
+            $("#countAllUsers").text(response.totalUsers);
+            $("#countActive").text(response.activeUsers);
+            $("#countInactive").text(response.inactiveUsers);
+        },
+        error: function (err) {
+            console.log('Unable to fetch the data.', err);
+        }
+    })
+
 }

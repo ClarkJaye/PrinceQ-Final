@@ -150,6 +150,8 @@ namespace PrinceQueuing.Controllers
                     .OrderByDescending(x => x.Category!.Sum) 
                     .FirstOrDefault();
 
+                if(highestServed == null) return Json(new { IsSuccess = false, value = highestServed });
+
                 return Json(new { IsSuccess = true, value = highestServed });
             }
             catch (Exception ex)
@@ -245,7 +247,7 @@ namespace PrinceQueuing.Controllers
                     return Json(response);
                 }
 
-                return Json(new { IsSuccess = false, Message = "Update User failed!" });
+                return Json(new { IsSuccess = false, Message = "There's no changes on this user!" });
             }
             catch (Exception ex)
             {
@@ -276,6 +278,30 @@ namespace PrinceQueuing.Controllers
         {
             var response = await _admin.RemoveAssignUserCategories(categoryId, userId);
             return Json(response);
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetUserCounts()
+        {
+            try
+            {
+                int totalUsers = await _unitOfWork.users.Count();
+                int activeUsers = await _unitOfWork.users.Count(u => u.IsActiveId == 1);
+                int inactiveUsers = await _unitOfWork.users.Count(u => u.IsActiveId == 2);
+
+                var response = new
+                {
+                    TotalUsers = totalUsers,
+                    ActiveUsers = activeUsers,
+                    InactiveUsers = inactiveUsers
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in GetUserCounts action");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { IsSuccess = false, Message = "An error occurred while fetching user counts." });
+            }
         }
 
 
@@ -449,29 +475,163 @@ namespace PrinceQueuing.Controllers
         {
             return View();
         }
-        public async Task<IActionResult> GetAllWaitingTimeData(string year, string month)
+        public async Task<IActionResult> GetAllWaitingTimeData(string range, string year, string month)
         {
             try
             {
-                if (year != null && month == null)
+                if (range is null || range == "fr")
                 {
-                    var data = await _unitOfWork.queueNumbers.GetAll(d =>
-                        d.StatusId == 2 &&
-                        d.QueueId!.Substring(0, 4) == year &&
-                        d.ForFilling_start.HasValue &&
-                        d.ForFilling_end.HasValue);
+                    if (year != null && month == null)
+                    {
+                        var data = await _unitOfWork.queueNumbers.GetAll(d =>
+                            d.StatusId == 2 &&
+                            d.QueueId!.Substring(0, 4) == year &&
+                            d.ForFilling_start.HasValue &&
+                            d.ForFilling_end.HasValue);
 
-                    var monthlyData = data
-                        .GroupBy(item => item.CategoryId)
-                        .Select(g => new
-                        {
-                            CategoryId = g.Key,
-                            //AverageForFillingTimeInMinutes = (int)(g.Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds) / 60),
-                            AverageSpan= FormatTimeSpan(g.Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds))
-                        })
-                        .ToList();
+                        var monthlyData = data
+                            .GroupBy(item => item.QueueId!.Substring(4, 2))
+                            .Select(g => new
+                            {
+                                Month = g.Key,
+                                CategoryAAvg = g.Where(i => i.CategoryId == 1).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 1).Average(i => (i.Releasing_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                                CategoryBAvg = g.Where(i => i.CategoryId == 2).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 2).Average(i => (i.Releasing_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                                CategoryCAvg = g.Where(i => i.CategoryId == 3).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 3).Average(i => (i.Releasing_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                                //CategoryDAvg = g.Where(i => i.CategoryId == 4).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 4).Average(i => (i.Releasing_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                            })
+                            .ToList();
 
-                    return Json(new { ByMonth = true, value = monthlyData });
+                        return Json(new { ByMonth = true, value = monthlyData });
+                    }
+                    else if (year != null && month != null)
+                    {
+                        var data = await _unitOfWork.queueNumbers.GetAll(d =>
+                           d.StatusId == 2 &&
+                           d.QueueId!.Substring(0, 6) == year + month &&
+                           d.ForFilling_start.HasValue &&
+                           d.ForFilling_end.HasValue);
+
+                        var dailyData = data
+                            .GroupBy(item => item.QueueId!.Substring(6, 2))
+                            .Select(g => new
+                            {
+                                Day = g.Key,
+                                CategoryAAvg = g.Where(i => i.CategoryId == 1).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 1).Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                                CategoryBAvg = g.Where(i => i.CategoryId == 2).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 2).Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                                CategoryCAvg = g.Where(i => i.CategoryId == 3).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 3).Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                                //CategoryDAvg = g.Where(i => i.CategoryId == 4).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 4).Average(i => (i.Releasing_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                                GenerateDate = g.Select(i => i.QueueId).FirstOrDefault()
+                            })
+                            .ToList();
+
+                        return Json(new { ByMonth = false, value = dailyData });
+                    }
+                    else
+                    {
+                        return Json(null);
+                    }
+                }
+                else if (range != null && range == "ff")
+                {
+                    if (year != null && month == null)
+                    {
+                        var data = await _unitOfWork.queueNumbers.GetAll(d =>
+                            d.StatusId == 2 &&
+                            d.QueueId!.Substring(0, 4) == year &&
+                            d.ForFilling_start.HasValue &&
+                            d.ForFilling_end.HasValue);
+
+                        var monthlyData = data
+                            .GroupBy(item => item.QueueId!.Substring(4, 2))
+                            .Select(g => new
+                            {
+                                Month = g.Key,
+                                CategoryAAvg = g.Where(i => i.CategoryId == 1).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 1).Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                                CategoryBAvg = g.Where(i => i.CategoryId == 2).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 2).Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                                CategoryCAvg = g.Where(i => i.CategoryId == 3).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 3).Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                                CategoryDAvg = g.Where(i => i.CategoryId == 4).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 4).Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                            })
+                            .ToList();
+
+                        return Json(new { ByMonth = true, value = monthlyData });
+                    }
+                    else if (year != null && month != null)
+                    {
+                        var data = await _unitOfWork.queueNumbers.GetAll(d =>
+                           d.StatusId == 2 &&
+                           d.QueueId!.Substring(0, 6) == year + month &&
+                           d.ForFilling_start.HasValue &&
+                           d.ForFilling_end.HasValue);
+
+                        var dailyData = data
+                            .GroupBy(item => item.QueueId!.Substring(6, 2))
+                            .Select(g => new
+                            {
+                                Day = g.Key,
+                                CategoryAAvg = g.Where(i => i.CategoryId == 1).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 1).Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                                CategoryBAvg = g.Where(i => i.CategoryId == 2).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 2).Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                                CategoryCAvg = g.Where(i => i.CategoryId == 3).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 3).Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                                CategoryDAvg = g.Where(i => i.CategoryId == 4).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 4).Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
+                                GenerateDate = g.Select(i => i.QueueId).FirstOrDefault()
+                            })
+                            .ToList();
+
+                        return Json(new { ByMonth = false, value = dailyData });
+                    }
+                    else
+                    {
+                        return Json(null);
+                    }
+                }
+                else if (range != null && range == "rr")
+                {
+                    if (year != null && month == null)
+                    {
+                        var data = await _unitOfWork.queueNumbers.GetAll(d =>
+                            d.StatusId == 2 &&
+                            d.QueueId!.Substring(0, 4) == year &&
+                            d.ForFilling_start.HasValue &&
+                            d.ForFilling_end.HasValue);
+
+                        var monthlyData = data
+                            .GroupBy(item => item.QueueId!.Substring(4, 2))
+                            .Select(g => new
+                            {
+                                Month = g.Key,
+                                CategoryAAvg = g.Where(i => i.CategoryId == 1).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 1).Average(i => (i.Releasing_end!.Value - i.Releasing_start!.Value).TotalSeconds)) : "00",
+                                CategoryBAvg = g.Where(i => i.CategoryId == 2).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 2).Average(i => (i.Releasing_end!.Value - i.Releasing_start!.Value).TotalSeconds)) : "00",
+                                CategoryCAvg = g.Where(i => i.CategoryId == 3).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 3).Average(i => (i.Releasing_end!.Value - i.Releasing_start!.Value).TotalSeconds)) : "00",
+                            })
+                            .ToList();
+
+                        return Json(new { ByMonth = true, value = monthlyData });
+                    }
+                    else if (year != null && month != null)
+                    {
+                        var data = await _unitOfWork.queueNumbers.GetAll(d =>
+                           d.StatusId == 2 &&
+                           d.QueueId!.Substring(0, 6) == year + month &&
+                           d.ForFilling_start.HasValue &&
+                           d.ForFilling_end.HasValue);
+
+                        var dailyData = data
+                            .GroupBy(item => item.QueueId!.Substring(6, 2))
+                            .Select(g => new
+                            {
+                                Day = g.Key,
+                                CategoryAAvg = g.Where(i => i.CategoryId == 1).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 1).Average(i => (i.Releasing_end!.Value - i.Releasing_start!.Value).TotalSeconds)) : "00",
+                                CategoryBAvg = g.Where(i => i.CategoryId == 2).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 2).Average(i => (i.Releasing_end!.Value - i.Releasing_start!.Value).TotalSeconds)) : "00",
+                                CategoryCAvg = g.Where(i => i.CategoryId == 3).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 3).Average(i => (i.Releasing_end!.Value - i.Releasing_start!.Value).TotalSeconds)) : "00",
+                                GenerateDate = g.Select(i => i.QueueId).FirstOrDefault()
+                            })
+                            .ToList();
+
+                        return Json(new { ByMonth = false, value = dailyData });
+                    }
+                    else
+                    {
+                        return Json(null);
+                    }
                 }
                 else
                 {
@@ -484,13 +644,12 @@ namespace PrinceQueuing.Controllers
                 return Json(new { IsSuccess = false, message = "An error occurred in GetUser." });
             }
         }
-        private string FormatTimeSpan(double totalSeconds)
+
+        private string FormatSeconds(double totalSeconds)
         {
             var timeSpan = TimeSpan.FromSeconds(totalSeconds);
-            return $"{(int)timeSpan.TotalMinutes} minutes and {timeSpan.Seconds} seconds";
+            return $"{(int)timeSpan.TotalMinutes}.{timeSpan.Seconds}";
         }
-
-
 
         //-----Announcement-----//
         public IActionResult Announcement()

@@ -17,6 +17,7 @@ namespace PrinceQ.DataAccess.Repository.IRepository
 
         bool Any(Expression<Func<T, bool>> filter);
 
+        Task<int> Count(Expression<Func<T, bool>>? filter = null);
 
     }
 

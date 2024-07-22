@@ -264,8 +264,6 @@ namespace PrinceQ.DataAccess.Services
                 queueItem.StageId = 1;
                 queueItem.ForFilling_start = DateTime.Now;
 
-                //For Serving the QueueNumbers
-                //var servingData = await _unitOfWork.servings.Get(u => u.UserId == userId && u.Served_At.Date == DateTime.Today);
                 var servingData = await _unitOfWork.servings.Get(u => u.UserId == userId);
                 if (servingData != null)
                 {
@@ -273,6 +271,11 @@ namespace PrinceQ.DataAccess.Services
                     if(prevQ is not null)
                     {
                         prevQ.StatusId = 2;
+
+                        if (prevQ.CategoryId == 4)
+                        {
+                            prevQ.ForFilling_end = DateTime.Now;
+                        }
                         _unitOfWork.queueNumbers.Update(prevQ);
                     }
                     //For Filling Start End
@@ -477,6 +480,10 @@ namespace PrinceQ.DataAccess.Services
                     if (prevQ is not null)
                     {
                         prevQ.StatusId = 2;
+                        if (prevQ.CategoryId == 4)
+                        {
+                            prevQ.ForFilling_end = DateTime.Now;
+                        }
                         _unitOfWork.queueNumbers.Update(prevQ);
                     }
 

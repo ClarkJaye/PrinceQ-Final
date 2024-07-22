@@ -58,27 +58,33 @@
     <div class="bg-white rounded border shadow">
         <div class="border-bottom">
             <div class="d-flex align-items-center justify-content-between p-3 px-4">
-                <h6 class="fw-bold m-0">Waiting Time Statistics</h6> 
+                <h6 class="fw-bold m-0">Average Waiting Time Statistics</h6> 
                 <button class="btn btn-sm btn-primary d-flex align-items-center gap-2" style="font-size: 12px;">
                     See Detailed
                     <i class="lni lni-arrow-right fw-bold" style="font-size:14px;"></i>
                 </button>
             </div>
         </div>
-        <div class="d-flex align-items-center justify-content-end p-2 px-5">
+        <div class="d-flex align-items-center justify-content-between p-2 px-5">
+          
+            <div>
+                <select id="selectedRange" class="form-select" onchange="LoadWaitingData( this.value, document.getElementById('selectedYear').value, document.getElementById('selectedMonth').value)">
+                    <option value="" selected disabled>Select Range</option>
+                    <option value="ff">ForFilling Start To ForFilling End</option>
+                    <option value="rr">Releasing Start To Releasing End</option>
+                    <option value="fr">ForFilling Start To Releasing End</option>
+
+                </select>
+            </div>
+
+         @*    <div class="d-flex align-items-center gap-3">
+                <input type="date" name="" onchange="" class="form-control" />
+                <i class="lni lni-arrow-right fw-bold" style="font-size:16px;"></i>
+                <input type="date" name="" onchange="" class="form-control" />
+            </div> *@
 
             <div class="yearContainer d-flex gap-2">
-                <select id="selectedYear" onchange="LoadData(this.value,  document.getElementById('selectedMonth').value)" class="form-select">
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
-                    <option value="2026">2026</option>
-                    <option value="2027">2027</option>
-                    <option value="2028">2028</option>
-                    <option value="2029">2029</option>
-                    <option value="2030">2030</option>
-                </select>
-
-                <select id="selectedMonth" onchange="LoadData( document.getElementById('selectedYear').value, this.value)" class="form-select">
+                <select id="selectedMonth" onchange="LoadWaitingData( document.getElementById('selectedRange').value, document.getElementById('selectedYear').value, this.value)" class="form-select">
                     <option data-month="All" value="">All</option>
                     <option data-month="January" value="01">January</option>
                     <option data-month="February" value="02">February</option>
@@ -93,11 +99,23 @@
                     <option data-month="November" value="11">November</option>
                     <option data-month="December" value="12">December</option>
                 </select>
+
+                <select id="selectedYear" onchange="LoadWaitingData( document.getElementById('selectedRange').value, this.value,  document.getElementById('selectedMonth').value)" class="form-select">
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                    <option value="2029">2029</option>
+                    <option value="2030">2030</option>
+                </select>
             </div>
+
+
         </div>
 
         <div class="pb-5 mx-5">
-            <canvas id="myChart"></canvas>
+            <canvas id="waitingChart"></canvas>
         </div>
     </div>
 

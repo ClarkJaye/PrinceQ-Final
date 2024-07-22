@@ -6,39 +6,43 @@
 }
 
 <header>
-    <div class="container-fluid text-center border">
+    <div class="container-fluid text-center">
         <div class="d-flex align-items-center justify-content-between px-3">
             <a class="navbar-brand">
-                <img src="~/src/prg_logo.png" style="width:80px;height: 80px;object-fit: contain;" alt="Queue_Interview" />
+                <img src="~/src/prg_logo.png" style="width:100px;height: 100px;object-fit: contain;" alt="Queue_Interview" />
             </a>
-            <h2 class="fst-italic"> QUEUE NUMBER </h2>
+            @* <h2 class="fst-italic"> NO# </h2> *@
+            <h5 class="fw-bold">@DateTime.ParseExact(Model.QueueId!.ToString(), "yyyyMMdd", null).ToString("MMMM d, yyyy")</h5>
         </div>
 
         <div class="d-flex flex-column align-items-center">
 
-            @* <div class="border rounded p-3 px-5" style="max-width: 300px;"> *@
-                <h1 class=" fw-bold text-center" style="font-size: 80px;">
-                    @if (Model.CategoryId == 1)
-                    {
-                        <text>A - @Model.QueueNumber</text>
-                    }
-                    else if (Model.CategoryId == 2)
-                    {
-                        <text>B - @Model.QueueNumber</text>
-                    }
-                    else if (Model.CategoryId == 3)
-                    {
-                        <text>C - @Model.QueueNumber</text>
-                    }
-                    else if (Model.CategoryId == 4)
-                    {
-                        <text>D - @Model.QueueNumber</text>
-                    }
-                </h1>
-            @* </div> *@
+            <h1 class="fst-italic fw-bold text-center rounded-3 p-3 px-5" style="font-size: 96px; border: 1px solid gray">
+                @if (Model.CategoryId == 1)
+                {
+                    <text>A - @Model.QueueNumber</text>
+                }
+                else if (Model.CategoryId == 2)
+                {
+                    <text>B - @Model.QueueNumber</text>
+                }
+                else if (Model.CategoryId == 3)
+                {
+                    <text>C - @Model.QueueNumber</text>
+                }
+                else if (Model.CategoryId == 4)
+                {
+                    <text>D - @Model.QueueNumber</text>
+                }
+            </h1>
 
-            <div class="mt-4 mb-2">
+            @* <div class="mt-2 mb-3">
                 <h5 class="fw-bold">@DateTime.ParseExact(Model.QueueId!.ToString(), "yyyyMMdd", null).ToString("MMMM d, yyyy")</h5>
+            </div> *@
+
+
+            <div class="d-flex flex-column" style="border-bottom: 1px solid gray; padding-left: 4rem; padding-right: 4rem">
+                <p class="mt-4 pb-3">SUPPLIER NAME:</p>
             </div>
 
         </div>
@@ -65,7 +69,7 @@
         var printStyles = `
             @@media print {
                 @@page {
-                    size: 6in 3in;
+                    size: 2.5in 1.5in;
                     margin: 0;
                 }
 

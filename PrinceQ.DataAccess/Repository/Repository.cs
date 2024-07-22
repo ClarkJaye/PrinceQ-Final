@@ -86,7 +86,18 @@ namespace PrinceQ.DataAccess.Repository
             return _dbSet.Any(filter);
         }
 
-   
+        // COUNT
+        public async Task<int> Count(Expression<Func<T, bool>>? filter = null)
+        {
+            IQueryable<T> query = _dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+            return await query.CountAsync();
+        }
+
+
 
     }
 

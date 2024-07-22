@@ -92,16 +92,7 @@
             </div>
 
             <div class="yearContainer d-flex gap-2">
-                <select id="selectedYear" onchange="LoadServeData(document.getElementById('selectedClerk').value, this.value,  document.getElementById('selectedMonth').value)" class="form-select">
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
-                    <option value="2026">2026</option>
-                    <option value="2027">2027</option>
-                    <option value="2028">2028</option>
-                    <option value="2029">2029</option>
-                    <option value="2030">2030</option>
-                </select>
-
+              
                 <select id="selectedMonth" onchange="LoadServeData(document.getElementById('selectedClerk').value, document.getElementById('selectedYear').value, this.value)" class="form-select">
                     <option data-month="All" value="">All</option>
                     <option data-month="January" value="01">January</option>
@@ -116,6 +107,16 @@
                     <option data-month="October" value="10">October</option>
                     <option data-month="November" value="11">November</option>
                     <option data-month="December" value="12">December</option>
+                </select>
+
+                <select id="selectedYear" onchange="LoadServeData(document.getElementById('selectedClerk').value, this.value,  document.getElementById('selectedMonth').value)" class="form-select">
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                    <option value="2028">2028</option>
+                    <option value="2029">2029</option>
+                    <option value="2030">2030</option>
                 </select>
             </div>
 
