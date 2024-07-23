@@ -428,6 +428,7 @@ function GetAllRleasingQueue() {
         url: "/Clerk/GetAllReleasingQueues",
         dataType: "json",
         success: function (response) {
+            console.log(response)
             var releasingQ = response.obj;
             releasingQ.sort(function (a, b) {
                 return new Date(a.releasing_At) - new Date(b.releasing_At);

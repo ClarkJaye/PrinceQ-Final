@@ -5,7 +5,6 @@
     ViewData["Title"] = "Clerk side";
     Layout = "_CLayout";
 
-    // var userName = Model.Users!.ClerkNumber;
     var clerkNumber = Model.ClerkNumber!.ClerkNumber;
 }
 
@@ -170,12 +169,11 @@
         <div class="col-3 p-0 position-relative" style="background-color: #F0F1F4; border-right: 2px solid #DEE2E6">
             <div class="py-2 px-2 d-flex align-items-center justify-content-between" style="border-bottom: 1px solid rgba(0, 0, 0, 0.5);">
                 <div>
-                    @* <h2 class="fst-italic" id="ClerkNum">@userName</h2> *@
                     <h2 class="fst-italic" id="ClerkNum">
                     </h2>
                 </div>
 
-                <a class="navbar-brand text-dark">
+                <a class="navbar-brand text-dark d-none d-md-block">
                     <img src="~/src/logo-prince.png" style="width: 60px;height: 50px;object-fit: contain;" alt="Queuing" />
                 </a>
             </div>
@@ -191,9 +189,8 @@
                 </div>
             </div>
 
-            <!--Button-->
+            <!--Buttons-->
             <div class="d-grid gap-2 col-5 mx-auto py-5">
-                @* <button type="button" class="btn btn-primary" id="doneBtn" type="button">Done</button> *@
                 <button type="button" class="btn btn-success" id="callBtn" type="button">Call</button>
                 <button type="button" class="btn btn-warning" id="reserveBtn" type="button">Reserve</button>
                 <button type="button" class="btn btn-dark" id="cancelBtn" type="button">Cancel</button>
@@ -211,17 +208,20 @@
             <div class="position-absolute" style="top: 5px; right: 5px;">
                 <partial name="_LoginPartial" />
             </div>
-            <h4 class="text-center mb-3 mb-res fst-italic">Waiting</h4>
-            <div class="mb-4">
 
-                <!--Category count-->
-                <div class="d-flex justify-content-around align-items-center mt-4 waitingCont" id="WaitingCountNumber">
+            @if (clerkNumber?.ToLower() != "clerk 2")
+            {
+                <h4 class="text-center mb-3 mb-res fst-italic">Waiting</h4>
+                <div class="mb-4">
+
+                    <!--Category count-->
+                    <div class="d-flex justify-content-around align-items-center mt-4 waitingCont" id="WaitingCountNumber">
+                    </div>
+
                 </div>
+            }
 
-
-            </div>
-
-            <!------PROCESS------->
+@*             <!------PROCESS------->
             <div class="row" style="border-top: 1px solid #5c636a">
                 <div class="col-6">
                     <!------Filling Up------->
@@ -263,18 +263,18 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> *@
 
 
 
-@*             <!------PROCESS------->
-            <div class="row" style="border-top: 1px solid #5c636a">
+            <!------PROCESS------->
+            <div class="row">
                 @if(clerkNumber?.ToLower() == "clerk 1")
                 {
-                    <div class="col-12">
+                    <div class="col-12" style="border-top: 1px solid #5c636a">
                         <!------Filling Up------->
                         <div class=" pt-3">
-                            <h4 class="text-center mb-res fst-italic">Filling Up</h4>
+                            <h4 class="text-center mb-res fst-italic">FILLING UP</h4>
                             <div class="overflow-auto tableRel" style="max-height: 350px; height: 300px;">
                                 <table id="fillingTable" class="table table-striped text-center bg-white" style="border-radius: 8px;">
                                     <thead class="bg-info">
@@ -294,11 +294,11 @@
                 }
                 else if (clerkNumber?.ToLower() == "clerk 2" || clerkNumber?.ToLower() == "clerk 3")
                 {
-                    <div class="col-12">
+                    <div class="col-12 pt-4">
                         <!------Releasing------->
                         <div class=" pt-3">
-                            <h4 class="text-center mb-res fst-italic">Releasing</h4>
-                            <div class="overflow-auto tableRel" style="max-height: 400px; height: 300px;">
+                            <h4 class="text-center mb-res fst-italic">RELEASING</h4>
+                            <div class="overflow-auto tableRel" style="max-height: 500px; height: 400px;">
                                 <table id="releaseTable" class="table table-striped text-center bg-white" style="border-radius: 8px;">
                                     <thead class="bg-danger text-white">
                                         <tr>
@@ -316,13 +316,13 @@
                     </div>
                 }
               
-            </div> *@
+            </div>
 
 
 
             <!------RESERVE------->
             <div class="pt-3" style="border-top: 1px solid #5c636a">
-                <h4 class="text-center mb-res fst-italic">Reserved</h4>
+                <h4 class="text-center mb-res fst-italic">RESERVED</h4>
                 <div class="overflow-auto tableRes" style="max-height:400px; height: 200px;">
                     <table id="reserveTable" class="table table-striped text-center bg-white" style="border-radius: 8px;">
                         <thead class="bg-warning">

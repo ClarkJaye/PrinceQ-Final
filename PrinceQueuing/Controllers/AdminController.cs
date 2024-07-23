@@ -497,7 +497,6 @@ namespace PrinceQueuing.Controllers
                                 CategoryAAvg = g.Where(i => i.CategoryId == 1).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 1).Average(i => (i.Releasing_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
                                 CategoryBAvg = g.Where(i => i.CategoryId == 2).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 2).Average(i => (i.Releasing_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
                                 CategoryCAvg = g.Where(i => i.CategoryId == 3).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 3).Average(i => (i.Releasing_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
-                                //CategoryDAvg = g.Where(i => i.CategoryId == 4).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 4).Average(i => (i.Releasing_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
                             })
                             .ToList();
 
@@ -519,7 +518,6 @@ namespace PrinceQueuing.Controllers
                                 CategoryAAvg = g.Where(i => i.CategoryId == 1).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 1).Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
                                 CategoryBAvg = g.Where(i => i.CategoryId == 2).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 2).Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
                                 CategoryCAvg = g.Where(i => i.CategoryId == 3).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 3).Average(i => (i.ForFilling_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
-                                //CategoryDAvg = g.Where(i => i.CategoryId == 4).Any() ? FormatSeconds(g.Where(i => i.CategoryId == 4).Average(i => (i.Releasing_end!.Value - i.ForFilling_start!.Value).TotalSeconds)) : "00",
                                 GenerateDate = g.Select(i => i.QueueId).FirstOrDefault()
                             })
                             .ToList();
