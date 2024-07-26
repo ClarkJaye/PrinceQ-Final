@@ -21,12 +21,19 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0-preview.2.24158.2" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.2-dev-00341" />
     <PackageReference Include="System.Management" Version="8.0.0" />
     <PackageReference Include="Wangkanai.Detection" Version="8.14.0" />
   </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\PrinceQ.DataAccess\PrinceQ.DataAccess.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Reference Include="ExternalLogin">
+      <HintPath>External\ExternalLogin.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -5,7 +5,7 @@
     ViewData["Title"] = "Clerk side";
     Layout = "_CLayout";
 
-    var clerkNumber = Model.ClerkNumber!.ClerkNumber;
+    var clerkNumber = Model.ClerkNumber?.ClerkNumber;
 }
 
 <style>
@@ -162,6 +162,8 @@
 
 </style>
 
+<partial name="_NavbarPartial" />
+
 <div class="container-fluid h-100">
     <div class="row h-100">
 
@@ -204,9 +206,11 @@
         </div>
 
         <!--Right Side-->
-        <div class="col-9 p-3 border">
-            <div class="position-absolute" style="top: 5px; right: 5px;">
-                <partial name="_LoginPartial" />
+        <div class="col-9 p-1 border">
+            <div class="d-flex justify-content-end">
+                <button class="btn btn-sm btn-secondary" id="showNavBtn">
+                    Show
+                </button>
             </div>
 
             @if (clerkNumber?.ToLower() != "clerk 2")
@@ -221,7 +225,7 @@
                 </div>
             }
 
-@*             <!------PROCESS------->
+            <!------PROCESS------->
             <div class="row" style="border-top: 1px solid #5c636a">
                 <div class="col-6">
                     <!------Filling Up------->
@@ -263,11 +267,11 @@
                         </div>
                     </div>
                 </div>
-            </div> *@
+            </div>
 
 
 
-            <!------PROCESS------->
+        @*     <!------PROCESS------->
             <div class="row">
                 @if(clerkNumber?.ToLower() == "clerk 1")
                 {
@@ -316,7 +320,7 @@
                     </div>
                 }
               
-            </div>
+            </div> *@
 
 
 
@@ -343,21 +347,36 @@
     </div>
 </div>
 
-<!-- Display the QueueNumber That is Not Done -->
-<div class="modal fade" id="NotDoneQueues" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog">
+<!-- Number of Cheques Modal -->
+<div class="modal fade" id="chequeCountModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: 350px;">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">
-                    Waiting Queues that are not done yesterday.
-                </h5>
+            <div class="modal-header bg-warning">
+                <h6 class="modal-title fw-bold">Number of Cheques</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body px-5" id="modalContentCont">
-            </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-primary" id="startNewBtn" data-bs-dismiss="modal">
-                    Start New Serving
-                </button>
+            <div class="modal-body">
+                <form id="UpdateQueueForm" method="POST">
+                    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                    <div id="qNum" hidden>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input id="QueueNumber" class="form-control p-2 text-center" disabled style="font-size: 2rem;" />
+                        <label for="QueueNumber">Queue #: </label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="number" id="Cheques" class="form-control" placeholder="Name" />
+                        <label for="Cheques">Number of Cheque</label>
+                        <span id="ChequeValid" class="text-danger"></span>
+                    </div>
+
+                    <div class="mt-4 mb-3 text-end">
+                        <button type="submit" class="btn btn-primary w-100" id="serveBtn">Save</button>
+                    </div>
+                </form>
+
             </div>
         </div>
     </div>
@@ -365,3 +384,22 @@
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/js/clerk/ClerkScript.js"></script>
+
+<script>
+    var $mainNav = $('#mainNav');
+    var $showNavBtn = $('#showNavBtn');
+
+    // Initially hide the main navigation
+    $mainNav.hide();
+
+    $showNavBtn.on("click", function () {
+        if ($mainNav.is(':visible')) {
+            $mainNav.slideUp();
+            $showNavBtn.text('Show');
+        } else {
+            $mainNav.slideDown();
+            $showNavBtn.text('Hide');
+        }
+    });
+
+</script>

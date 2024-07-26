@@ -146,7 +146,7 @@ function editUser(id) {
                 });
 
                 var activeText = user.isActive == 1 ? "Active" : "InActive";
-                activeSelect.append('<option selected>' + activeText + '</option>');
+                activeSelect.append('<option selected value=' + user.isActive + '>' + activeText + '</option>');
                 $.each(user.active, function (i, data) {
                     if (data.name.toLowerCase() !== activeText.toLowerCase()) {
                         activeSelect.append('<option value=' + data.isActiveId + '>' + data.name + '</option>');

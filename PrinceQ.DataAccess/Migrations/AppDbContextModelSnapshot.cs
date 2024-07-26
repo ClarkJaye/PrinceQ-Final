@@ -500,6 +500,9 @@ namespace PrinceQ.DataAccess.Migrations
                     b.Property<int>("StatusId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("Total_Cheques")
+                        .HasColumnType("int");
+
                     b.HasKey("QueueId", "CategoryId", "QueueNumber");
 
                     b.HasIndex("CategoryId");

@@ -12,8 +12,8 @@ using PrinceQ.DataAccess.Data.Context;
 namespace PrinceQ.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240717033105_Iniitial")]
-    partial class Iniitial
+    [Migration("20240725075352_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -501,6 +501,9 @@ namespace PrinceQ.DataAccess.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Total_Cheques")
                         .HasColumnType("int");
 
                     b.HasKey("QueueId", "CategoryId", "QueueNumber");

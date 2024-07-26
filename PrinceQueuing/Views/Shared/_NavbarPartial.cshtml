@@ -1,0 +1,33 @@
+﻿<header id="mainNav">
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-yellow border-bottom box-shadow p-0">
+        <div class="container-fluid">
+            <a class="navbar-brand text-light" asp-area="" asp-controller="RegisterPersonnel" asp-action="Home">
+                <img src="~/src/logo-prince.png" style="width: 60px;height: 40px;object-fit: contain;" alt="Queue_Reception_System" />
+            </a>
+
+            <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon text-white"></span>
+            </button>
+
+            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between position-relative">
+                <ul class="navbar-nav flex-grow-1 px-2 gap-3 h-nav">
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "RegisterPersonnel" && ViewContext.RouteData.Values["action"]?.ToString() == "Home" ? "text-danger" : "text-dark")" asp-controller="RegisterPersonnel" asp-action="Home">Generate Queue</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Clerk" && ViewContext.RouteData.Values["action"]?.ToString() == "Serving" ? "text-danger" : "text-dark")" asp-controller="Clerk" asp-action="Serving">Serving</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "text-danger" : "text-dark")" asp-controller="Admin" asp-action="Dashboard">Admin</a>
+                    </li>
+
+                </ul>
+
+                <partial name="_LoginPartial" />
+            </div>
+        </div>
+    </nav>
+</header>

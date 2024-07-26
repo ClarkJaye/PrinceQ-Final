@@ -1,3 +1,5 @@
+using ExternalLogin.Interfaces;
+using ExternalLogin.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
@@ -7,15 +9,30 @@ using PrinceQ.Models.Entities;
 using PrinceQ.DataAccess.Interfaces;
 using PrinceQ.DataAccess.Services;
 using PrinceQ.DataAccess.Hubs;
+using ExternalLogin;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((ctx, lc) => lc.WriteTo.Console().ReadFrom.Configuration(ctx.Configuration));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// set the db connection
+var CentralLoginConnectionString = builder.Configuration.GetConnectionString("CentralLoginConnection")
+?? throw new InvalidOperationException("Connection string 'ExternalDbContext' not found.");
+
+builder.Services.AddDbContext<ExternalDbContext>(options =>
+    options.UseSqlServer(CentralLoginConnectionString));
+
+//external login
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IExternalLoginService, ExternalLoginService>();
+
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {

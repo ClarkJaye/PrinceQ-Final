@@ -62,7 +62,6 @@ connectionQueueHub.on("LoadAnnouncement", () => {
     loadAnnouncement();
 })
 
-
 //Display In TV to Remove
 connectionQueueHub.on("QueueDisplayInTvRemove", (value) => {
     var clerkNumber = value.toLowerCase();
@@ -89,10 +88,10 @@ connectionQueueHub.on("CallQueueInTVRed", (value) => {
         display.classList.add("blink-red");
     } else if (clerkNumber === 'clerk 2') {
         display = document.getElementById('TVClerk2');
-        display.innerText = "----"
+        display.classList.add("blink-red");
     } else if (clerkNumber === 'clerk 3') {
         display = document.getElementById('TVClerk3');
-        display.innerText = "----"
+        display.classList.add("blink-red");
     }
     setTimeout(function () {
         display.classList.remove("blink-red");

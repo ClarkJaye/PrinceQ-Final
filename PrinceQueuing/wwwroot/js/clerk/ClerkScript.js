@@ -12,6 +12,10 @@
     GetAllReserveQueue();
     //LOAD All Queuenumbers Count on each Category
     GetAllQueueCountNumbers();
+    // Add Total Cheque
+    $("#UpdateQueueForm").on("submit", function (e) {
+        UpdateQueueTotalCheques(e);
+    });
 
     // Bind click event to the Next 
     $('#WaitingCountNumber').on("click", ".nextBtn", getNextQueueNumber);
@@ -59,7 +63,6 @@ function DisplayCurrentServe() {
         success: function (response) {
             var categoryId = response.categoryId;
             var queueNumber = response.queueNumber;
-
             if (response != null) {
                 if (categoryId === 1) {
                     servingDisplay.innerText = "A - " + queueNumber;
@@ -93,35 +96,30 @@ function getNextQueueNumber() {
         data: { id: categoryId },
         success: function (response) {
             var queue = response.obj;
-            if (response && response.isSuccess == false) {
-                //alert(response.message);
-                button.prop('disabled', true);
-                setTimeout(function () {
-                    button.prop('disabled', false);
-                }, 1000)
-            }
-            else {
-                // Play background music
+            if (response.isSuccess === true && response.obj !== null) {
                 playBackgroundMusic();
-
                 button.prop('disabled', true);
                 callBtn.prop('disabled', true);
-
                 setTimeout(function () {
                     button.prop('disabled', false);
                     callBtn.prop('disabled', false);
                 }, 2000);
-
-                // Enable button after 1 second
                 setTimeout(function () {
-                    // Speak the category and queue number
                     var getQ = getCategoryLetter(queue.categoryId);
-                    var queueNumber = getQ +"-- " + queue.queueNumber;
-                   
+                    var queueNumber = getQ + "-- " + queue.queueNumber;
+
                     var clerk = document.getElementById("ClerkNum").textContent;
                     var speechText = queueNumber + " Please Proceed to " + clerk;
                     speak(speechText);
                 }, 1000);
+            } else if (response.isSuccess === false && response.obj !== null) {
+                DisplayModalCheque(queue);
+            }
+            else{
+                button.prop('disabled', true);
+                setTimeout(function () {
+                    button.prop('disabled', false);
+                }, 1000)
             }
         },
         error: function (error) {
@@ -428,7 +426,6 @@ function GetAllRleasingQueue() {
         url: "/Clerk/GetAllReleasingQueues",
         dataType: "json",
         success: function (response) {
-            console.log(response)
             var releasingQ = response.obj;
             releasingQ.sort(function (a, b) {
                 return new Date(a.releasing_At) - new Date(b.releasing_At);
@@ -512,7 +509,6 @@ function ToReleasingQueue() {
 
 }
 
-
 //Speak
 function speak(text) {
     const synth = window.speechSynthesis;
@@ -536,8 +532,6 @@ function ServeQueueInTable() {
     var qNumber = $(this).data("qnumber");
     var callBtn = $('#callBtn');
 
-    //var prevQueue = JSON.parse(localStorage.getItem('queueItem'));
-
     $.ajax({
         type: 'GET',
         url: "/Clerk/ServeQueueFromTable",
@@ -545,22 +539,14 @@ function ServeQueueInTable() {
             generateDate: generateDate,
             categoryId: categoryId,
             qNumber: qNumber,
-/*            prevQueue: JSON.stringify(prevQueue),*/
         },
         dataType: "json",
         success: function (response) {
             var queueItem = response.obj;
             if (response && response.isSuccess == true) {
-                //// Store the Queue Object into local storage
-                //localStorage.setItem('queueItem', JSON.stringify(queueItem));
-
-                // Play background music
                 playBackgroundMusic();
-
-                //Display the Current Serve
                 DisplayCurrentServe();
                 callBtn.prop('disabled', true);
-                // Execute after 1 second
                 setTimeout(function () {
                     callBtn.prop('disabled', false);
 
@@ -574,7 +560,7 @@ function ServeQueueInTable() {
                 }, 1000);
             }
             else {
-                alert(response.message);
+                DisplayModalCheque(queueItem);
             }
         },
         error: function (error) {
@@ -646,3 +632,50 @@ function GetClerkNumber() {
     });
 }
 
+//Display the Modal of Cheque
+function DisplayModalCheque(queue) {
+    $('#Cheques').val('');
+    $("#qNum").attr("data-genDate", queue.queueId).attr("data-category", queue.categoryId).attr("data-qnumber", queue.queueNumber)
+    var qNumber = getCategoryLetter(queue.categoryId) + " - " + queue.queueNumber;
+    $("#QueueNumber").val(qNumber);
+    $('#chequeCountModal').modal('show');
+}
+
+function UpdateQueueTotalCheques(e) {
+    e.preventDefault();
+    var generateDate = $('#qNum').data("gendate");
+    var categoryId = $('#qNum').data("category");
+    var qNumber = $('#qNum').data("qnumber");
+    var chequeValue = $("#Cheques").val();
+    if (chequeValue) {
+        $.ajax({
+            url: "/Clerk/UpdateQueueNumber",
+            type: "POST",
+            data: {
+                generateDate: generateDate,
+                categoryId: categoryId,
+                qNumber: qNumber,
+                cheque: chequeValue
+            },
+            dataType: 'json',
+            success: function (response) {
+                if (response && response.isSuccess) {
+
+                    toastr.success(response.message)
+                }
+                else {
+                    alert(response.message)
+                }
+
+                $('#chequeCountModal').modal('hide');
+            },
+            error: function (err) {
+                console.log('Unable to fetch the data.', err);
+            }
+
+        })
+    } else {
+        alert("Please enter the total cheque.")
+    }
+   
+}

@@ -44,3 +44,10 @@ body {
         width: 80%;
     }
 }
+
+
+
+.h-nav > li:hover {
+    background: rgb(239, 237, 237);
+    border-radius: 5px;
+}

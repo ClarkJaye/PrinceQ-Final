@@ -1,4 +1,4 @@
-﻿@model Queues
+﻿@* @model Queues
 
 @{
     ViewData["Title"] = "Print Number";
@@ -6,45 +6,6 @@
 }
 
 <header>
-    <div class="row">
-        <div class="col-12 text-center">
-            <div class="d-flex align-items-center justify-content-between px-2">
-                <a class="navbar-brand ">
-                    <img src="~/src/prg_newlogo.png" style="width:50px;height: 50px;object-fit: cover;" alt="Queue_Interview" />
-                </a>
-                <p class="fw-bold m-0" style="font-size: 12px;">@DateTime.ParseExact(Model.QueueId!.ToString(), "yyyyMMdd", null).ToString("MMMM d, yyyy")</p>
-            </div>
-            <div class="d-flex flex-column align-items-center">
-                <h1 class="fst-italic fw-bold text-center rounded-3 p-1 px-4" style="font-size: 2rem; border: 1px solid gray; margin-top: -1rem;">
-                    @if (Model.CategoryId == 1)
-                    {
-                        <text>A - @Model.QueueNumber</text>
-                    }
-                    else if (Model.CategoryId == 2)
-                    {
-                        <text>B - @Model.QueueNumber</text>
-                    }
-                    else if (Model.CategoryId == 3)
-                    {
-                        <text>C - @Model.QueueNumber</text>
-                    }
-                    else if (Model.CategoryId == 4)
-                    {
-                        <text>D - @Model.QueueNumber</text>
-                    }
-                </h1>
-
-                <div class="d-flex flex-column justify-content-center" style="border-bottom: 1px solid gray;">
-                    <p class="pb-2 px-3" style="font-size: 12px;">SUPPLIER NAME:</p>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</header>
-
-
-@* <header>
     <div class="position-absolute h-100" style="left: 58%; border-left: 1px dashed gray;"></div>
     <div class="row position-relative">
         <div class="col-7 text-center print-container">
@@ -106,7 +67,7 @@
             </div>
         </div>
     </div>
-</header> *@
+</header>
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
@@ -126,15 +87,10 @@
 
 </script>
 
+ *@
 
 
-
-
-
-
-
-
-@* @model Queues
+@model Queues
 
 @{
     ViewData["Title"] = "Print Number";
@@ -184,7 +140,7 @@
                 <img src="~/src/prg_logo.png" style="width:80px;height: 80px;object-fit: contain;" alt="Queue_Interview" />
             </a>
             <div class="d-flex flex-row align-items-center justify-content-center" style="margin-top: -1rem;">
-                <h1 class="fst-italic fw-bold text-center rounded-3 p-1 px-3" style="font-size: 2rem; border: 1px solid gray">
+                <h1 class="fst-italic fw-bold text-center rounded-3 px-2" style="font-size: 2rem; border: 1px solid gray">
                     @if (Model.CategoryId == 1)
                     {
                         <text>A - @Model.QueueNumber</text>
@@ -224,8 +180,3 @@
     }
 
 </script>
-
-
-
-
- *@

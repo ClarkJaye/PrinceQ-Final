@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrinceQ.DataAccess.Interfaces;
+using PrinceQ.Models.Entities;
 using PrinceQ.Utility;
 using PrinceQueuing.Extensions;
 using System.Management;
@@ -51,8 +52,6 @@ namespace PrinceQueuing.Controllers
 
             return Json(response);
         }
-
-
 
 
         //Get All Categories
@@ -258,6 +257,22 @@ namespace PrinceQueuing.Controllers
             }
         }
 
+        // Update QueueNumber
+        public async Task <IActionResult> UpdateQueueNumber(string generateDate, int categoryId, int qNumber, int cheque)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                var response = await _clerk.ToUpdateQueue(generateDate, categoryId, qNumber, userId, cheque);
+
+                return Json(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in UpdateQueueNumber action");
+                return Json(new { IsSuccess = false, message = "An error occurred in UpdateQueueNumber." });
+            }
+        }
 
         //HELPER
         private string GetCurrentUserId()
@@ -269,6 +284,8 @@ namespace PrinceQueuing.Controllers
         {
             ManagementObject os = new ManagementObject("Win32_OperatingSystem=@");
             string deviceId = os["SerialNumber"].ToString()!;
+
+            _logger.LogInformation(deviceId);
 
             return deviceId;
         }

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PrinceQ.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class Iniitial : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -330,6 +330,7 @@ namespace PrinceQ.DataAccess.Migrations
                     CategoryId = table.Column<int>(type: "int", nullable: false),
                     QueueNumber = table.Column<int>(type: "int", nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false),
+                    Total_Cheques = table.Column<int>(type: "int", nullable: true),
                     ForFilling_start = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ForFilling_end = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Releasing_start = table.Column<DateTime>(type: "datetime2", nullable: true),

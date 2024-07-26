@@ -24,6 +24,8 @@ namespace PrinceQ.Models.Entities
         [Required]
         public int? QueueNumber { get; set; }
 
+        public int? Total_Cheques { get; set; }
+
         public DateTime? ForFilling_start { get; set; }
         public DateTime? ForFilling_end { get; set; }
         public DateTime? Releasing_start { get; set; }
