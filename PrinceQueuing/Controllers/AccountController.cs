@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using ExternalLogin.Extensions;
+using ExternalLogin.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -6,7 +8,7 @@ using PrinceQ.DataAccess.Repository;
 using PrinceQ.Models.Entities;
 using PrinceQ.Models.ViewModel;
 using PrinceQ.Utility;
-using System.Management;
+using System.Net;
 using System.Security.Claims;
 
 namespace PrinceQueuing.Controllers
@@ -18,12 +20,14 @@ namespace PrinceQueuing.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<User> _userManager;
         private readonly IUnitOfWork _unitOfWork;
-        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IUnitOfWork unitOfWork)
+        private readonly IExternalLoginService _externalLoginService;
+        public AccountController(SignInManager<User> signInManager, UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IUnitOfWork unitOfWork, IExternalLoginService externalLoginService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _roleManager = roleManager;
             _unitOfWork = unitOfWork;
+            _externalLoginService = externalLoginService;
         }
 
         [AllowAnonymous]
@@ -33,25 +37,27 @@ namespace PrinceQueuing.Controllers
             {
                 if (User.Identity!.IsAuthenticated)
                 {
-                    string? userId =  User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                     var user = await _userManager.FindByIdAsync(userId!);
 
                     if (user != null)
                     {
                         var roles = await _userManager.GetRolesAsync(user);
-                     
-                        if (roles.Contains(SD.Role_Register))
-                        {
-                            return RedirectToAction("Home", "RegisterPersonnel");
-                        }
-                        else if (roles.Contains(SD.Role_Clerk))
-                        {
-                            return RedirectToAction("Serving", "Clerk");
-                        }
-                        else if (roles.Contains(SD.Role_Admin))
-                        {
-                            return RedirectToAction("Dashboard", "Admin");
-                        }
+
+                        //if (roles.Contains(SD.Role_Personnel))
+                        //{
+                        //    return RedirectToAction("Home", "RegisterPersonnel");
+                        //}
+                        //else if (roles.Contains(SD.Role_Clerk))
+                        //{
+                        //    return RedirectToAction("Serving", "Clerk");
+                        //}
+                        //else if (roles.Contains(SD.Role_Admin))
+                        //{
+                        //    return RedirectToAction("Dashboard", "Admin");
+                        //}
+                        return RedirectToAction("Index", "Home");
+
                     }
                 }
                 return View();
@@ -77,9 +83,11 @@ namespace PrinceQueuing.Controllers
                     var user = await _userManager.FindByNameAsync(model.Username!);
                     var roles = await _userManager.GetRolesAsync(user!);
 
-                    var deviceId = GetDeviceId();
+                    //var ipAddress = HttpContext.IpAddress();
 
-                    var clerkUser = await _unitOfWork.device.Get(u => u.DeviceId == deviceId);
+                    var ipAddress = GetUserIpAddress();
+
+                    var clerkUser = await _unitOfWork.device.Get(u => u.IPAddress == ipAddress);
                     if (clerkUser != null)
                     {
                         clerkUser.UserId = user?.Id;
@@ -87,19 +95,22 @@ namespace PrinceQueuing.Controllers
                         await _unitOfWork.SaveAsync();
                     }
 
-                    if (roles.Contains(SD.Role_Register))
-                    {
-                        return RedirectToAction("Home", "RegisterPersonnel");
-                    }
 
-                    else if (roles.Contains(SD.Role_Clerk))
-                    {
-                        return RedirectToAction("Serving", "Clerk");
-                    }
-                    else if (roles.Contains(SD.Role_Admin))
-                    {
-                        return RedirectToAction("Dashboard", "Admin");
-                    }
+                    return RedirectToAction("Index", "Home");
+
+                    //if (roles.Contains(SD.Role_Personnel))
+                    //{
+                    //    return RedirectToAction("Home", "RegisterPersonnel");
+                    //}
+
+                    //else if (roles.Contains(SD.Role_Clerk))
+                    //{
+                    //    return RedirectToAction("Serving", "Clerk");
+                    //}
+                    //else if (roles.Contains(SD.Role_Admin))
+                    //{
+                    //    return RedirectToAction("Dashboard", "Admin");
+                    //}
                 }
 
                 ModelState.AddModelError("", "Invalid login attempt");
@@ -114,11 +125,12 @@ namespace PrinceQueuing.Controllers
         {
 
             // Create roles if they are not created
-            if (!_roleManager.RoleExistsAsync(SD.Role_Clerk).GetAwaiter().GetResult())
+            if (!_roleManager.RoleExistsAsync(SD.Role_Staff1).GetAwaiter().GetResult())
             {
                 _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin)).GetAwaiter().GetResult();
-                _roleManager.CreateAsync(new IdentityRole(SD.Role_Clerk)).GetAwaiter().GetResult();
-                _roleManager.CreateAsync(new IdentityRole(SD.Role_Register)).GetAwaiter().GetResult();
+                _roleManager.CreateAsync(new IdentityRole(SD.Role_Staff1)).GetAwaiter().GetResult();
+                _roleManager.CreateAsync(new IdentityRole(SD.Role_Staff2)).GetAwaiter().GetResult();
+                _roleManager.CreateAsync(new IdentityRole(SD.Role_Staff3)).GetAwaiter().GetResult();
             }
 
             var roleList = _roleManager.Roles.Select(x => new SelectListItem
@@ -181,14 +193,41 @@ namespace PrinceQueuing.Controllers
             return RedirectToAction("Login", "Account");
         }
 
-        private string GetDeviceId()
+        //Temporary
+        private string GetUserIpAddress()
         {
-            ManagementObject os = new ManagementObject("Win32_OperatingSystem=@");
-            string deviceId = os["SerialNumber"].ToString()!;
+            string userIpAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
 
-            return deviceId;
+            if (string.IsNullOrEmpty(userIpAddress) || userIpAddress == "::1")
+            {
+                try
+                {
+                    string hostName = Dns.GetHostName();
+                    IPHostEntry ipHostEntries = Dns.GetHostEntry(hostName);
+                    IPAddress[] ipAddresses = ipHostEntries.AddressList;
+
+                    foreach (IPAddress ipAddress in ipAddresses)
+                    {
+                        if (ipAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        {
+                            userIpAddress = ipAddress.ToString();
+                            break;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(userIpAddress))
+                    {
+                        userIpAddress = ipAddresses.Length > 0 ? ipAddresses[0].ToString() : "127.0.0.1";
+                    }
+                }
+                catch
+                {
+                    userIpAddress = "127.0.0.1";
+                }
+            }
+
+            return userIpAddress;
         }
-
 
 
     }

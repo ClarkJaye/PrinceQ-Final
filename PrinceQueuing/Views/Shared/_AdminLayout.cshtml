@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject SignInManager<User> SignInManager
 @inject UserManager<User> UserManager
+@using PrinceQ.Utility
 
 <html lang="en">
 <head>
@@ -12,25 +13,25 @@
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/PrinceQueuing.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.lineicons.com/4.0/lineicons.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="/lib/dist/virtual-select.min.css" />
 
 
 </head>
 <body>
       <div class="wrapper">
-        @* <aside id="sidebar" class="expand"> *@
         <aside id="sidebar">
             <div class="d-flex">
                 <button class="toggle-btn">
-                    <a asp-controller="Admin" asp-action="Dashboard"><img src="~/Audio/logo.png" alt="" width="40" height="40" class="rounded-circle me-3"></a>
+                    <a asp-controller="" asp-action=""><img src="~/Audio/logo.png" alt="" width="40" height="40" class="rounded-circle me-3"></a>
                 </button>
                 <div class="sidebar-logo">
                     <a asp-controller="Admin" asp-action="Dashboard">PrinceQ</a>
                 </div>
             </div>
+
             <ul class="sidebar-nav">
                 <li class="sidebar-item">
                     <a asp-controller="Admin" asp-action="Dashboard" class="sidebar-link">
@@ -57,19 +58,14 @@
                     </ul>
                 </li>
 
-               @*  <li class="sidebar-item">
-                    <a asp-controller="Admin" asp-action="Category" class="sidebar-link">
-                        <i class="lni lni-layout"></i>
-                        <span>Category</span>
-                    </a>
-                </li> *@
-
                 <li class="sidebar-item">
                     <a asp-controller="Admin" asp-action="Users" class="sidebar-link">
                         <i class="lni lni-user"></i>
                         <span>Users</span>
                     </a>
                 </li>
+          
+
                 <li class="sidebar-item">
                     <a asp-controller="Admin" asp-action="ManageVideo" class="sidebar-link">
                         <i class="lni lni-video"></i>

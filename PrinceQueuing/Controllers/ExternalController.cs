@@ -23,33 +23,6 @@ namespace PrinceQueuing.Controllers
             this.signInManager = signInManager;
         }
 
-        //[HttpGet]
-        //public async Task<IActionResult> Login(string token) // make sure to add the parameter in the endpoint
-        //{
-        //    var ipaddress = HttpContext.IpAddress();
-        //    var usercode = string.Empty;
-
-        //    if (externalLoginService.TryValidateToken(token, ipaddress, out usercode))
-        //        return await AuthenticateUser(usercode); // if validated, this is where you setup the user session 
-
-        //    return RedirectToAction("Index", "Home");
-        //}
-
-        //public IActionResult Logout()
-        //{
-        //    return Redirect(externalLoginService.PortalUrl);
-        //}
-
-        //// sample app user session setup 
-        //private async Task<IActionResult> AuthenticateUser(string usercode)
-        //{
-        //    //var user = await userManager.FindByNameAsync(usercode + "@princeretail.com");
-        //    var user = await userManager.FindByNameAsync(usercode);
-
-        //    if (user != null)
-        //        await signInManager.SignInAsync(user, isPersistent: false);
-        //      return RedirectToAction("Index", "Home");
-        //}
 
         [HttpGet]
         public async Task<IActionResult> Login(string token) // make sure to add the parameter in the endpoint
@@ -82,18 +55,20 @@ namespace PrinceQueuing.Controllers
 
                 var roles = await userManager.GetRolesAsync(user);
 
-                if (roles.Contains(SD.Role_Register))
-                {
-                    return RedirectToAction("Home", "RegisterPersonnel");
-                }
-                else if (roles.Contains(SD.Role_Clerk))
-                {
-                    return RedirectToAction("Serving", "Clerk");
-                }
-                else if (roles.Contains(SD.Role_Admin))
-                {
-                    return RedirectToAction("Dashboard", "Admin");
-                }
+                //if (roles.Contains(SD.Role_Personnel))
+                //{
+                //    return RedirectToAction("Home", "RegisterPersonnel");
+                //}
+                //else if (roles.Contains(SD.Role_Clerk))
+                //{
+                //    return RedirectToAction("Serving", "Clerk");
+                //}
+                //else if (roles.Contains(SD.Role_Admin))
+                //{
+                //    return RedirectToAction("Dashboard", "Admin");
+                //}
+
+                return RedirectToAction("Index", "Home");
             }
 
             return Redirect(externalLoginService.PortalUrl);

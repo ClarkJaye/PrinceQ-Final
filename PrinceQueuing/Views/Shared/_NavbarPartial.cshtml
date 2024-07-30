@@ -1,8 +1,10 @@
-﻿<header id="mainNav">
+﻿@using PrinceQ.Utility
+<header id="mainNav">
     <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-yellow border-bottom box-shadow p-0">
         <div class="container-fluid">
-            <a class="navbar-brand text-light" asp-area="" asp-controller="RegisterPersonnel" asp-action="Home">
-                <img src="~/src/logo-prince.png" style="width: 60px;height: 40px;object-fit: contain;" alt="Queue_Reception_System" />
+            <a class="navbar-brand text-light" asp-area="" asp-controller="" asp-action="">
+                @* <img src="~/src/logo-prince.png" style="width: 60px;height: 40px;object-fit: contain;" alt="Queue_Reception_System" /> *@
+                <img src="~/src/prg_newlogo.png" width="50" class="mx-2">
             </a>
 
             <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -12,18 +14,28 @@
 
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between position-relative">
                 <ul class="navbar-nav flex-grow-1 px-2 gap-3 h-nav">
+
+
                     <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "RegisterPersonnel" && ViewContext.RouteData.Values["action"]?.ToString() == "Home" ? "text-danger" : "text-dark")" asp-controller="RegisterPersonnel" asp-action="Home">Generate Queue</a>
+                        <a class="nav-link d-flex align-items-center gap-1 @(ViewContext.RouteData.Values["controller"]?.ToString() == "RegisterPersonnel" && ViewContext.RouteData.Values["action"]?.ToString() == "Home" ? "text-danger" : "text-dark")" asp-controller="RegisterPersonnel" asp-action="Home">
+                            <i class="lni lni-clipboard"></i> 
+                            <p class="m-0">Generate Queue</p>
+                        </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Clerk" && ViewContext.RouteData.Values["action"]?.ToString() == "Serving" ? "text-danger" : "text-dark")" asp-controller="Clerk" asp-action="Serving">Serving</a>
+                        <a class="nav-link d-flex align-items-center gap-1 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Clerk" && ViewContext.RouteData.Values["action"]?.ToString() == "Filling" ? "text-danger" : "text-dark")" asp-controller="Clerk" asp-action="Filling">
+                            <i class="lni lni-pencil-alt"></i>
+                            <p class="m-0">Filling Up</p>
+                        </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Admin" && ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "text-danger" : "text-dark")" asp-controller="Admin" asp-action="Dashboard">Admin</a>
+                        <a class="nav-link d-flex align-items-center gap-1 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Clerk" && ViewContext.RouteData.Values["action"]?.ToString() == "Releasing" ? "text-danger" : "text-dark")" asp-controller="Clerk" asp-action="Releasing">
+                            <i class="lni lni-arrow-right-circle"></i> 
+                            <p class="m-0">Releasing</p>
+                        </a>
                     </li>
-
                 </ul>
 
                 <partial name="_LoginPartial" />

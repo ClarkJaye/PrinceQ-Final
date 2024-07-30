@@ -12,7 +12,7 @@ using PrinceQ.DataAccess.Data.Context;
 namespace PrinceQ.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240725075352_Initial")]
+    [Migration("20240729073000_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -34,6 +34,11 @@ namespace PrinceQ.DataAccess.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
+
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -51,25 +56,9 @@ namespace PrinceQ.DataAccess.Migrations
 
                     b.ToTable("AspNetRoles", (string)null);
 
-                    b.HasData(
-                        new
-                        {
-                            Id = "18ab63db-22b1-4656-93e8-6240c08c988c",
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
-                        },
-                        new
-                        {
-                            Id = "5671e11c-00b4-4302-9214-c3b7f7b71188",
-                            Name = "RegisterPersonnel",
-                            NormalizedName = "REGISTERPERSONNEL"
-                        },
-                        new
-                        {
-                            Id = "fbc43974-ddf4-4fed-8a0b-42e6897f259f",
-                            Name = "Clerk",
-                            NormalizedName = "CLERK"
-                        });
+                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityRole");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -167,7 +156,7 @@ namespace PrinceQ.DataAccess.Migrations
                         new
                         {
                             UserId = "cadf9177-f64e-4ab6-bb37-f50770ef67b5",
-                            RoleId = "5671e11c-00b4-4302-9214-c3b7f7b71188"
+                            RoleId = "3462t34c-64b4-2341-6532-c3b7f7b72477"
                         },
                         new
                         {
@@ -203,6 +192,64 @@ namespace PrinceQ.DataAccess.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("PrinceQ.Models.Entities.Access", b =>
+                {
+                    b.Property<int>("AccessId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AccessId"));
+
+                    b.Property<string>("AccessName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("Created_At")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.HasKey("AccessId");
+
+                    b.ToTable("Access");
+
+                    b.HasData(
+                        new
+                        {
+                            AccessId = 1,
+                            AccessName = "GenerateNumber"
+                        },
+                        new
+                        {
+                            AccessId = 2,
+                            AccessName = "ForFilling"
+                        },
+                        new
+                        {
+                            AccessId = 3,
+                            AccessName = "Releasing"
+                        },
+                        new
+                        {
+                            AccessId = 4,
+                            AccessName = "Announcement"
+                        },
+                        new
+                        {
+                            AccessId = 5,
+                            AccessName = "Video"
+                        },
+                        new
+                        {
+                            AccessId = 6,
+                            AccessName = "Users"
+                        },
+                        new
+                        {
+                            AccessId = 7,
+                            AccessName = "Roles"
+                        });
                 });
 
             modelBuilder.Entity("PrinceQ.Models.Entities.Announcement", b =>
@@ -301,9 +348,9 @@ namespace PrinceQ.DataAccess.Migrations
                         });
                 });
 
-            modelBuilder.Entity("PrinceQ.Models.Entities.ClerkDevice", b =>
+            modelBuilder.Entity("PrinceQ.Models.Entities.ClerkIPAddress", b =>
                 {
-                    b.Property<string>("DeviceId")
+                    b.Property<string>("IPAddress")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ClerkNumber")
@@ -312,7 +359,7 @@ namespace PrinceQ.DataAccess.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.HasKey("DeviceId");
+                    b.HasKey("IPAddress");
 
                     b.HasIndex("UserId");
 
@@ -321,7 +368,7 @@ namespace PrinceQ.DataAccess.Migrations
                     b.HasData(
                         new
                         {
-                            DeviceId = "00330-71344-74698-AAOEM",
+                            IPAddress = "10.64.14.50",
                             ClerkNumber = "Clerk 1"
                         });
                 });
@@ -517,6 +564,83 @@ namespace PrinceQ.DataAccess.Migrations
                     b.HasIndex("StatusId");
 
                     b.ToTable("QueueNumbers");
+                });
+
+            modelBuilder.Entity("PrinceQ.Models.Entities.Role_Access", b =>
+                {
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessId")
+                        .HasColumnType("int");
+
+                    b.HasKey("RoleId", "AccessId");
+
+                    b.HasIndex("AccessId");
+
+                    b.ToTable("Role_Access");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c",
+                            AccessId = 1
+                        },
+                        new
+                        {
+                            RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c",
+                            AccessId = 2
+                        },
+                        new
+                        {
+                            RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c",
+                            AccessId = 3
+                        },
+                        new
+                        {
+                            RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c",
+                            AccessId = 4
+                        },
+                        new
+                        {
+                            RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c",
+                            AccessId = 5
+                        },
+                        new
+                        {
+                            RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c",
+                            AccessId = 6
+                        },
+                        new
+                        {
+                            RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c",
+                            AccessId = 7
+                        },
+                        new
+                        {
+                            RoleId = "3462t34c-64b4-2341-6532-c3b7f7b72477",
+                            AccessId = 1
+                        },
+                        new
+                        {
+                            RoleId = "3462t34c-64b4-2341-6532-c3b7f7b72477",
+                            AccessId = 2
+                        },
+                        new
+                        {
+                            RoleId = "3462t34c-64b4-2341-6532-c3b7f7b72477",
+                            AccessId = 3
+                        },
+                        new
+                        {
+                            RoleId = "fbc43974-ddf4-4fed-8a0b-42e6897f259f",
+                            AccessId = 1
+                        },
+                        new
+                        {
+                            RoleId = "fbc43974-ddf4-4fed-8a0b-42e6897f259f",
+                            AccessId = 2
+                        });
                 });
 
             modelBuilder.Entity("PrinceQ.Models.Entities.Serving", b =>
@@ -823,6 +947,33 @@ namespace PrinceQ.DataAccess.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PrinceQ.Models.Entities.Roles", b =>
+                {
+                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRole");
+
+                    b.HasDiscriminator().HasValue("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "18ab63db-22b1-4656-93e8-6240c08c988c",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = "3462t34c-64b4-2341-6532-c3b7f7b72477",
+                            Name = "Staff1",
+                            NormalizedName = "STAFF1"
+                        },
+                        new
+                        {
+                            Id = "fbc43974-ddf4-4fed-8a0b-42e6897f259f",
+                            Name = "Staff2",
+                            NormalizedName = "STAFF2"
+                        });
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -892,7 +1043,7 @@ namespace PrinceQ.DataAccess.Migrations
                     b.Navigation("IsActive");
                 });
 
-            modelBuilder.Entity("PrinceQ.Models.Entities.ClerkDevice", b =>
+            modelBuilder.Entity("PrinceQ.Models.Entities.ClerkIPAddress", b =>
                 {
                     b.HasOne("PrinceQ.Models.Entities.User", "User")
                         .WithMany()
@@ -968,6 +1119,25 @@ namespace PrinceQ.DataAccess.Migrations
                     b.Navigation("Stage");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PrinceQ.Models.Entities.Role_Access", b =>
+                {
+                    b.HasOne("PrinceQ.Models.Entities.Access", "Access")
+                        .WithMany()
+                        .HasForeignKey("AccessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PrinceQ.Models.Entities.Roles", "Roles")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Access");
+
+                    b.Navigation("Roles");
                 });
 
             modelBuilder.Entity("PrinceQ.Models.Entities.Serving", b =>

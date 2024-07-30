@@ -14,10 +14,25 @@ namespace PrinceQ.DataAccess.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Access",
+                columns: table => new
+                {
+                    AccessId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AccessName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Created_At = table.Column<DateTime>(type: "datetime2", nullable: true, defaultValueSql: "GETDATE()")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Access", x => x.AccessId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -82,6 +97,30 @@ namespace PrinceQ.DataAccess.Migrations
                     table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
                     table.ForeignKey(
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Role_Access",
+                columns: table => new
+                {
+                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    AccessId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Role_Access", x => new { x.RoleId, x.AccessId });
+                    table.ForeignKey(
+                        name: "FK_Role_Access_Access_AccessId",
+                        column: x => x.AccessId,
+                        principalTable: "Access",
+                        principalColumn: "AccessId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Role_Access_AspNetRoles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
@@ -252,13 +291,13 @@ namespace PrinceQ.DataAccess.Migrations
                 name: "Device",
                 columns: table => new
                 {
-                    DeviceId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IPAddress = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ClerkNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Device", x => x.DeviceId);
+                    table.PrimaryKey("PK_Device", x => x.IPAddress);
                     table.ForeignKey(
                         name: "FK_Device_AspNetUsers_UserId",
                         column: x => x.UserId,
@@ -419,19 +458,33 @@ namespace PrinceQ.DataAccess.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "AspNetRoles",
-                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                table: "Access",
+                columns: new[] { "AccessId", "AccessName" },
                 values: new object[,]
                 {
-                    { "18ab63db-22b1-4656-93e8-6240c08c988c", null, "Admin", "ADMIN" },
-                    { "5671e11c-00b4-4302-9214-c3b7f7b71188", null, "RegisterPersonnel", "REGISTERPERSONNEL" },
-                    { "fbc43974-ddf4-4fed-8a0b-42e6897f259f", null, "Clerk", "CLERK" }
+                    { 1, "GenerateNumber" },
+                    { 2, "ForFilling" },
+                    { 3, "Releasing" },
+                    { 4, "Announcement" },
+                    { 5, "Video" },
+                    { 6, "Users" },
+                    { 7, "Roles" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Discriminator", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { "18ab63db-22b1-4656-93e8-6240c08c988c", null, "Roles", "Admin", "ADMIN" },
+                    { "3462t34c-64b4-2341-6532-c3b7f7b72477", null, "Roles", "Staff1", "STAFF1" },
+                    { "fbc43974-ddf4-4fed-8a0b-42e6897f259f", null, "Roles", "Staff2", "STAFF2" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Device",
-                columns: new[] { "DeviceId", "ClerkNumber", "UserId" },
-                values: new object[] { "00330-71344-74698-AAOEM", "Clerk 1", null });
+                columns: new[] { "IPAddress", "ClerkNumber", "UserId" },
+                values: new object[] { "10.64.14.50", "Clerk 1", null });
 
             migrationBuilder.InsertData(
                 table: "IsActive",
@@ -487,6 +540,25 @@ namespace PrinceQ.DataAccess.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Role_Access",
+                columns: new[] { "AccessId", "RoleId" },
+                values: new object[,]
+                {
+                    { 1, "18ab63db-22b1-4656-93e8-6240c08c988c" },
+                    { 2, "18ab63db-22b1-4656-93e8-6240c08c988c" },
+                    { 3, "18ab63db-22b1-4656-93e8-6240c08c988c" },
+                    { 4, "18ab63db-22b1-4656-93e8-6240c08c988c" },
+                    { 5, "18ab63db-22b1-4656-93e8-6240c08c988c" },
+                    { 6, "18ab63db-22b1-4656-93e8-6240c08c988c" },
+                    { 7, "18ab63db-22b1-4656-93e8-6240c08c988c" },
+                    { 1, "3462t34c-64b4-2341-6532-c3b7f7b72477" },
+                    { 2, "3462t34c-64b4-2341-6532-c3b7f7b72477" },
+                    { 3, "3462t34c-64b4-2341-6532-c3b7f7b72477" },
+                    { 1, "fbc43974-ddf4-4fed-8a0b-42e6897f259f" },
+                    { 2, "fbc43974-ddf4-4fed-8a0b-42e6897f259f" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
                 values: new object[,]
@@ -494,7 +566,7 @@ namespace PrinceQ.DataAccess.Migrations
                     { "fbc43974-ddf4-4fed-8a0b-42e6897f259f", "3386761a-6384-4e97-9eb3-d2d09e6bfec5" },
                     { "fbc43974-ddf4-4fed-8a0b-42e6897f259f", "5817a627-dcb6-4612-85e5-13b56dc52560" },
                     { "fbc43974-ddf4-4fed-8a0b-42e6897f259f", "6a3e3e42-a9d7-4ce4-b97a-1f3a3007c8b4" },
-                    { "5671e11c-00b4-4302-9214-c3b7f7b71188", "cadf9177-f64e-4ab6-bb37-f50770ef67b5" },
+                    { "3462t34c-64b4-2341-6532-c3b7f7b72477", "cadf9177-f64e-4ab6-bb37-f50770ef67b5" },
                     { "18ab63db-22b1-4656-93e8-6240c08c988c", "f626b751-35a0-43df-8173-76cb5b4886fd" }
                 });
 
@@ -617,6 +689,11 @@ namespace PrinceQ.DataAccess.Migrations
                 column: "StatusId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Role_Access_AccessId",
+                table: "Role_Access",
+                column: "AccessId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Serving_CategoryId",
                 table: "Serving",
                 column: "CategoryId");
@@ -666,19 +743,25 @@ namespace PrinceQ.DataAccess.Migrations
                 name: "QueueNumbers");
 
             migrationBuilder.DropTable(
+                name: "Role_Access");
+
+            migrationBuilder.DropTable(
                 name: "Serving");
 
             migrationBuilder.DropTable(
                 name: "User_Category");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
-
-            migrationBuilder.DropTable(
                 name: "Queue_Statuses");
 
             migrationBuilder.DropTable(
                 name: "Stage");
+
+            migrationBuilder.DropTable(
+                name: "Access");
+
+            migrationBuilder.DropTable(
+                name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

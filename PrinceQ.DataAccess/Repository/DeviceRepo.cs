@@ -4,7 +4,7 @@ using PrinceQ.Models.Entities;
 
 namespace PrinceQ.DataAccess.Repository
 {
-    public class DeviceRepo : Repository<ClerkDevice>, IDeviceRepo
+    public class DeviceRepo : Repository<ClerkIPAddress>, IDeviceRepo
     {
         public DeviceRepo(AppDbContext db) : base(db)
         {

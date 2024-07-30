@@ -6,7 +6,7 @@ namespace PrinceQ.Models.ViewModel
     {
         public User? Users { get; set; }
 
-        public ClerkDevice? ClerkNumber { get; set; }
+        public ClerkIPAddress? ClerkNumber { get; set; }
 
     }
 }

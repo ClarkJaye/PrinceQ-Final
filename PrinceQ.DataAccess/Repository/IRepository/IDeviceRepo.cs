@@ -2,7 +2,7 @@
 
 namespace PrinceQ.DataAccess.Repository.IRepository
 {
-    public interface IDeviceRepo : IRepository<ClerkDevice>
+    public interface IDeviceRepo : IRepository<ClerkIPAddress>
     {
     }
 }

@@ -116,10 +116,10 @@ function getNextQueueNumber() {
                 DisplayModalCheque(queue);
             }
             else{
-                button.prop('disabled', true);
-                setTimeout(function () {
-                    button.prop('disabled', false);
-                }, 1000)
+                //button.prop('disabled', true);
+                //setTimeout(function () {
+                //    button.prop('disabled', false);
+                //}, 1000)
             }
         },
         error: function (error) {
@@ -158,11 +158,10 @@ function CallQueue() {
 
 
             } else {
-                //alert("There is no Queue Number.");
-                button.prop('disabled', true);
-                setTimeout(function () {
-                    button.prop('disabled', false);
-                }, 1000);
+                //button.prop('disabled', true);
+                //setTimeout(function () {
+                //    button.prop('disabled', false);
+                //}, 1000);
             }
         },
         error: function (error) {
@@ -193,10 +192,10 @@ function CancelQueue() {
             }
             else {
                 //alert(response.message)
-                button.prop('disabled', true);
-                setTimeout(function () {
-                    button.prop('disabled', false);
-                }, 1000)
+                //button.prop('disabled', true);
+                //setTimeout(function () {
+                //    button.prop('disabled', false);
+                //}, 1000)
             }
         },
         error: function (error) {
@@ -215,16 +214,18 @@ function ReserveQueue() {
         url: "/Clerk/ReserveQueue",
         dataType: "json",
         success: function (response) {
-            if (response) {
+            if (response && response.isSuccess === true) {
                 servingDisplay.innerText = "----";
-                ////Clear the localstorage
-                //localStorage.removeItem('queueItem');
                 button.prop('disabled', true);
                 setTimeout(function () {
                     button.prop('disabled', false);
                 }, 1000)
-            } else {
-                alert(response.message);
+            }
+            else {
+                //button.prop('disabled', true);
+                //setTimeout(function () {
+                //    button.prop('disabled', false);
+                //}, 1000)
             }
         },
         error: function (error) {
@@ -615,23 +616,6 @@ function getCategoryLetter(categoryId) {
     }
 }
 
-
-//Display Designated Clerk
-function GetClerkNumber() {
-    $.ajax({
-        url: "/Clerk/DesignatedDeviceId",
-        type: 'GET',
-        success: function (response) {
-            //console.log(response)
-            var clerk = response.obj1;
-            $('#ClerkNum').text(clerk.clerkNumber);    
-        },
-        error: function (error) {
-            console.log(error);
-        }
-    });
-}
-
 //Display the Modal of Cheque
 function DisplayModalCheque(queue) {
     $('#Cheques').val('');
@@ -678,4 +662,19 @@ function UpdateQueueTotalCheques(e) {
         alert("Please enter the total cheque.")
     }
    
+}
+
+//Display Designated Clerk
+function GetClerkNumber() {
+    $.ajax({
+        url: "/Clerk/DesignatedDeviceId",
+        type: 'GET',
+        success: function (response) {
+            var clerk = response.obj1;
+            $('#ClerkNum').text(clerk.clerkNumber);
+        },
+        error: function (error) {
+            console.log(error);
+        }
+    });
 }

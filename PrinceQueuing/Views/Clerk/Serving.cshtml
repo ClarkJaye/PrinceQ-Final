@@ -2,7 +2,7 @@
 ﻿@using PrinceQ.Models.ViewModel
 @model ClerkVM
 @{
-    ViewData["Title"] = "Clerk side";
+    ViewData["Title"] = "Serving";
     Layout = "_CLayout";
 
     var clerkNumber = Model.ClerkNumber?.ClerkNumber;
@@ -209,21 +209,18 @@
         <div class="col-9 p-1 border">
             <div class="d-flex justify-content-end">
                 <button class="btn btn-sm btn-secondary" id="showNavBtn">
-                    Show
+                    Hide
                 </button>
             </div>
 
-            @if (clerkNumber?.ToLower() != "clerk 2")
-            {
-                <h4 class="text-center mb-3 mb-res fst-italic">Waiting</h4>
-                <div class="mb-4">
+            <h4 class="text-center mb-3 mb-res fst-italic">Waiting</h4>
+            <div class="mb-4">
 
-                    <!--Category count-->
-                    <div class="d-flex justify-content-around align-items-center mt-4 waitingCont" id="WaitingCountNumber">
-                    </div>
-
+                <!--Category count-->
+                <div class="d-flex justify-content-around align-items-center mt-4 waitingCont" id="WaitingCountNumber">
                 </div>
-            }
+
+            </div>
 
             <!------PROCESS------->
             <div class="row" style="border-top: 1px solid #5c636a">
@@ -386,19 +383,18 @@
 <script src="~/js/clerk/ClerkScript.js"></script>
 
 <script>
-    var $mainNav = $('#mainNav');
-    var $showNavBtn = $('#showNavBtn');
+    var mainNav = $('#mainNav');
+    var showNavBtn = $('#showNavBtn');
 
-    // Initially hide the main navigation
-    $mainNav.hide();
+    mainNav.show();
 
-    $showNavBtn.on("click", function () {
-        if ($mainNav.is(':visible')) {
-            $mainNav.slideUp();
-            $showNavBtn.text('Show');
+    showNavBtn.on("click", function () {
+        if (mainNav.is(':visible')) {
+            mainNav.slideUp();
+            showNavBtn.text('Show');
         } else {
-            $mainNav.slideDown();
-            $showNavBtn.text('Hide');
+            mainNav.slideDown();
+            showNavBtn.text('Hide');
         }
     });
 

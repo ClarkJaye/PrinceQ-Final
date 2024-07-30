@@ -10,7 +10,10 @@ namespace PrinceQ.DataAccess.Data.Context
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<User> User { get; set; }
-        public DbSet<ClerkDevice> Device { get; set; }
+        public DbSet<Roles> Roles { get; set; }
+        public DbSet<Access> Access { get; set; }
+        public DbSet<Role_Access> Role_Access { get; set; }
+        public DbSet<ClerkIPAddress> Device { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Queue_Status> Queue_Statuses { get; set; }
         public virtual DbSet<Queues> QueueNumbers { get; set; }
@@ -121,32 +124,62 @@ namespace PrinceQ.DataAccess.Data.Context
                 );
 
             // Seed the roles
-            modelBuilder.Entity<IdentityRole>().HasData(
-                new IdentityRole { Id = "18ab63db-22b1-4656-93e8-6240c08c988c", Name = "Admin", NormalizedName = "ADMIN" },
-                new IdentityRole { Id = "5671e11c-00b4-4302-9214-c3b7f7b71188", Name = "RegisterPersonnel", NormalizedName = "REGISTERPERSONNEL" },
-                new IdentityRole { Id = "fbc43974-ddf4-4fed-8a0b-42e6897f259f", Name = "Clerk", NormalizedName = "CLERK" }
+            modelBuilder.Entity<Roles>().HasData(
+                new Roles { Id = "18ab63db-22b1-4656-93e8-6240c08c988c", Name = "Admin", NormalizedName = "ADMIN" },
+                new Roles { Id = "3462t34c-64b4-2341-6532-c3b7f7b72477", Name = "Staff1", NormalizedName = "STAFF1" },
+                new Roles { Id = "fbc43974-ddf4-4fed-8a0b-42e6897f259f", Name = "Staff2", NormalizedName = "STAFF2" }
             );
 
             modelBuilder.Entity<IdentityUserRole<string>>().HasData(
                    new { UserId = "f626b751-35a0-43df-8173-76cb5b4886fd", RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c" },
-                   new { UserId = "cadf9177-f64e-4ab6-bb37-f50770ef67b5", RoleId = "5671e11c-00b4-4302-9214-c3b7f7b71188" },
+                   new { UserId = "cadf9177-f64e-4ab6-bb37-f50770ef67b5", RoleId = "3462t34c-64b4-2341-6532-c3b7f7b72477" },
                    new { UserId = "3386761a-6384-4e97-9eb3-d2d09e6bfec5", RoleId = "fbc43974-ddf4-4fed-8a0b-42e6897f259f" },
                    new { UserId = "5817a627-dcb6-4612-85e5-13b56dc52560", RoleId = "fbc43974-ddf4-4fed-8a0b-42e6897f259f" },
                    new { UserId = "6a3e3e42-a9d7-4ce4-b97a-1f3a3007c8b4", RoleId = "fbc43974-ddf4-4fed-8a0b-42e6897f259f" }
                );
 
+
+            modelBuilder.Entity<Access>().HasData(
+                   new Access { AccessId = 1, AccessName = "GenerateNumber" },
+                   new Access { AccessId = 2, AccessName = "ForFilling" },
+                   new Access { AccessId = 3, AccessName = "Releasing" },
+                   new Access { AccessId = 4, AccessName = "Announcement" },
+                   new Access { AccessId = 5, AccessName = "Video" },
+                   new Access { AccessId = 6, AccessName = "Users" },
+                   new Access { AccessId = 7, AccessName = "Roles" }
+               );
+
+            modelBuilder.Entity<Role_Access>().HasData(
+                   new Role_Access { RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c", AccessId = 1 },
+                   new Role_Access { RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c", AccessId = 2 },
+                   new Role_Access { RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c", AccessId = 3 },
+                   new Role_Access { RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c", AccessId = 4 },
+                   new Role_Access { RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c", AccessId = 5 },
+                   new Role_Access { RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c", AccessId = 6 },
+                   new Role_Access { RoleId = "18ab63db-22b1-4656-93e8-6240c08c988c", AccessId = 7 },
+
+                   new Role_Access { RoleId = "3462t34c-64b4-2341-6532-c3b7f7b72477", AccessId = 1 },
+                   new Role_Access { RoleId = "3462t34c-64b4-2341-6532-c3b7f7b72477", AccessId = 2 },
+                   new Role_Access { RoleId = "3462t34c-64b4-2341-6532-c3b7f7b72477", AccessId = 3 },
+
+                   new Role_Access { RoleId = "fbc43974-ddf4-4fed-8a0b-42e6897f259f", AccessId = 1 },
+                   new Role_Access { RoleId = "fbc43974-ddf4-4fed-8a0b-42e6897f259f", AccessId = 2 }
+   
+               );
+
+
             modelBuilder.Entity<User_Category>().HasData(
-                //Clerk 1
+                //Staff 1
                 new User_Category { UserId = "3386761a-6384-4e97-9eb3-d2d09e6bfec5", CategoryId = 1},
                 new User_Category { UserId = "3386761a-6384-4e97-9eb3-d2d09e6bfec5", CategoryId = 2},
                 new User_Category { UserId = "3386761a-6384-4e97-9eb3-d2d09e6bfec5", CategoryId = 3},
                 new User_Category { UserId = "3386761a-6384-4e97-9eb3-d2d09e6bfec5", CategoryId = 4},
-                //Clerk 2
+                //Staff 2
                 new User_Category { UserId = "5817a627-dcb6-4612-85e5-13b56dc52560", CategoryId = 1 },
                 new User_Category { UserId = "5817a627-dcb6-4612-85e5-13b56dc52560", CategoryId = 2 },
                 new User_Category { UserId = "5817a627-dcb6-4612-85e5-13b56dc52560", CategoryId = 3 },
                 new User_Category { UserId = "5817a627-dcb6-4612-85e5-13b56dc52560", CategoryId = 4 },
-                //Clerk 3
+                //Staff 3
                 new User_Category { UserId = "6a3e3e42-a9d7-4ce4-b97a-1f3a3007c8b4", CategoryId = 1 },
                 new User_Category { UserId = "6a3e3e42-a9d7-4ce4-b97a-1f3a3007c8b4", CategoryId = 2 },
                 new User_Category { UserId = "6a3e3e42-a9d7-4ce4-b97a-1f3a3007c8b4", CategoryId = 3 },
@@ -181,14 +214,13 @@ namespace PrinceQ.DataAccess.Data.Context
                new Stage_Queue { StageId = 2, StageName = "Releasing" }
                );
 
-            modelBuilder.Entity<ClerkDevice>().HasData(
-               new ClerkDevice { DeviceId = "00330-71344-74698-AAOEM", ClerkNumber = "Clerk 1" }
+            modelBuilder.Entity<ClerkIPAddress>().HasData(
+               new ClerkIPAddress { IPAddress = "10.64.14.50", ClerkNumber = "Clerk 1" }
                );
 
             // For Junction 
-            modelBuilder.Entity<User>()
-              .Property(u => u.Created_At)
-              .HasDefaultValueSql("GETDATE()");
+            modelBuilder.Entity<Role_Access>()
+             .HasKey(uc => new { uc.RoleId, uc.AccessId });
 
             modelBuilder.Entity<Queues>()
                 .HasKey(uc => new { uc.QueueId, uc.CategoryId, uc.QueueNumber});
@@ -205,7 +237,11 @@ namespace PrinceQ.DataAccess.Data.Context
             modelBuilder.Entity<Clerk_Serve_Releasing>()
                 .HasKey(uc => new { uc.GenerateDate, uc.ClerkId, uc.CategoryId, uc.QueueNumber });
 
+
             // Default Date
+            modelBuilder.Entity<User>()
+              .Property(u => u.Created_At)
+              .HasDefaultValueSql("GETDATE()");
             modelBuilder.Entity<Category>()
                 .Property(u => u.Created_At)
                 .HasDefaultValueSql("GETDATE()");
@@ -221,6 +257,10 @@ namespace PrinceQ.DataAccess.Data.Context
             modelBuilder.Entity<Announcement>()
                 .Property(u => u.Created_At)
                 .HasDefaultValueSql("GETDATE()");
+
+            modelBuilder.Entity<Access>()
+               .Property(u => u.Created_At)
+               .HasDefaultValueSql("GETDATE()");
 
         }
 

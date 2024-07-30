@@ -11,7 +11,8 @@ using PrinceQ.Utility;
 
 namespace PrinceQueuing.Controllers
 {
-    [Authorize(Roles = SD.Role_Admin)]
+    //[Authorize(Policy = SD.Policy_Staff_Admin)]
+    [Authorize]
     public class AdminController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;

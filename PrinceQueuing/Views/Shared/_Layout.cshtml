@@ -1,45 +1,71 @@
-﻿<!DOCTYPE html>
+﻿@using PrinceQ.Utility
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - PrinceLine</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @* <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" /> *@
     <link rel="stylesheet" href="~/PrinceQueuing.styles.css" asp-append-version="true" />
     <link rel="icon" type="image/x-icon" href="/src/logo-prince.png">
+    <link rel="stylesheet" href="https://cdn.lineicons.com/4.0/lineicons.css" />
+
 </head>
+
+<style>
+    body{
+        background-color: #fafbfe;
+    }
+    nav{
+    }
+</style>
+
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-yellow border-bottom box-shadow p-0">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">NatalCare_System</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                <a class="navbar-brand text-light" asp-area="" asp-controller="" asp-action="">
+                    <img src="~/src/prg_newlogo.png" width="50" class="mx-2">
+                </a>
+
+                <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+                    <span class="navbar-toggler-icon text-white"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between position-relative">
+                    <ul class="navbar-nav flex-grow-1 px-2 gap-3 h-nav">
+
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link d-flex align-items-center gap-1 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "text-danger" : "text-dark")" asp-controller="Home" asp-action="Index">
+                                <i class="lni lni-home"></i>
+                                <p class="m-0">Home</p>
+                            </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                       
                     </ul>
+
+                    <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
     </header>
+
     <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main" class="pb-3 mt-5">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted bg-light">
         <div class="container">
-            &copy; 2024 - NatalCare_System - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="row">
+                <div class="col-12 p-2 d-flex align-items-center">
+                    <img src="~/src/prg_newlogo.png" width="40" class="mx-2">
+                    © 2024 - Prince Retail Group of Companies
+                </div>
+            </div>
         </div>
     </footer>
 

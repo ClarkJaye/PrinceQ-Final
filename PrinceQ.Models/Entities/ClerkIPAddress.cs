@@ -4,13 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PrinceQ.Models.Entities
 {
-    public class ClerkDevice
+    public class ClerkIPAddress
     {
         [Key]
-        public string? DeviceId { get; set; }
-
+        public string? IPAddress { get; set; }
         public string? ClerkNumber { get; set; }
-
         public string? UserId { get; set; }
         [ForeignKey("UserId")]
         [ValidateNever]

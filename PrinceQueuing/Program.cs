@@ -11,6 +11,9 @@ using PrinceQ.DataAccess.Services;
 using PrinceQ.DataAccess.Hubs;
 using ExternalLogin;
 using Serilog;
+using Microsoft.AspNetCore.Authorization;
+using PrinceQ.Utility;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,6 +58,28 @@ builder.Services.Configure<KestrelServerOptions>(options =>
 {
     options.Limits.MaxRequestBodySize = 524288000;
 });
+
+
+//builder.Services.AddAuthorization(options =>
+//{
+//    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+//        .RequireAuthenticatedUser()
+//        .Build();
+
+
+//    options.AddPolicy(SD.Policy_Staff_Admin, policy => policy.RequireAssertion(context =>
+//        context.User.IsInRole(SD.Role_Admin)
+//        || context.User.IsInRole(SD.Role_Staff1)
+//        || context.User.IsInRole(SD.Role_Staff2)
+//        || context.User.IsInRole(SD.Role_Staff3)
+//        || context.User.IsInRole(SD.Role_Staff4)
+//        || context.User.IsInRole(SD.Role_Staff5)
+//    ));
+    
+
+
+//});
+
 
 
 var app = builder.Build();

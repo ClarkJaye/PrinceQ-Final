@@ -9,7 +9,8 @@ using static PrinceQ.DataAccess.Response.ServiceResponses;
 
 namespace PrinceQueuing.Controllers
 {
-    [Authorize(Roles = SD.Role_Register)]
+    //[Authorize(Roles = SD.Role_Personnel)]
+    [Authorize]
     public class RegisterPersonnelController : Controller
     {
         private readonly IRegisterPersonnel _personnel;

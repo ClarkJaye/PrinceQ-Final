@@ -1,14 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PrinceQ.DataAccess.Interfaces;
-using PrinceQ.Models.Entities;
-using PrinceQ.Utility;
 using PrinceQueuing.Extensions;
-using System.Management;
+using System.Net;
 
 namespace PrinceQueuing.Controllers
 {
-    [Authorize(Roles = SD.Role_Clerk)]
+    //[Authorize(Policy = SD.Policy_Staff_Admin )]
+    [Authorize]
     public class ClerkController : Controller
     {
         private readonly IClerk _clerk;
@@ -20,14 +19,14 @@ namespace PrinceQueuing.Controllers
             _logger = logger;
         }
 
-        //Dashboard
+        //--------------- Views  -------------//
         public async Task<IActionResult> Serving()
         {
             try
             {
                 var userId = GetCurrentUserId();
-                var deviceId = GetDeviceId(); 
-                var response = await _clerk.ServingVM(userId, deviceId);
+                var ipAddress = GetUserIpAddress(); 
+                var response = await _clerk.ServingVM(userId, ipAddress);
 
                 if (response.IsSuccess)
                 {
@@ -43,12 +42,62 @@ namespace PrinceQueuing.Controllers
             }
         }
 
+        public async Task<IActionResult> Filling()
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                var ipAddress = GetUserIpAddress();
+                var response = await _clerk.ServingVM(userId, ipAddress);
+
+                if (response.IsSuccess)
+                {
+                    return View(response.Obj);
+                }
+                return RedirectToAction("Login", "Account");
+                //return NotFound(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in NextQueue action");
+                return Json(new { IsSuccess = false, message = "An error occurred in NextQueue." });
+            }
+        }
+
+        public async Task<IActionResult> Releasing()
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                var ipAddress = GetUserIpAddress();
+                var response = await _clerk.ServingVM(userId, ipAddress);
+
+                if (response.IsSuccess)
+                {
+                    return View(response.Obj);
+                }
+                return RedirectToAction("Login", "Account");
+                //return NotFound(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in NextQueue action");
+                return Json(new { IsSuccess = false, message = "An error occurred in NextQueue." });
+            }
+        }
+
+
+
+
+
+        //--------------- Functionalities -------------//
+
         //Get the designated Clerk Number
         public async Task<IActionResult> DesignatedDeviceId()
         {
-            var deviceId = GetDeviceId();
+            var ipAddress = GetUserIpAddress();
             var userId = GetCurrentUserId();
-            var response = await _clerk.DesignatedClerk(deviceId, userId);
+            var response = await _clerk.DesignatedClerk(ipAddress, userId);
 
             return Json(response);
         }
@@ -77,8 +126,8 @@ namespace PrinceQueuing.Controllers
             try
             {
                 var userId = GetCurrentUserId();
-                var device = GetDeviceId();
-                var response = await _clerk.GetServings(userId, device);
+                var ipAddress = GetUserIpAddress();
+                var response = await _clerk.GetServings(userId, ipAddress);
 
                 return Json(response);
             }
@@ -167,8 +216,8 @@ namespace PrinceQueuing.Controllers
             try
             {
                 var userId = GetCurrentUserId();
-                var device = GetDeviceId();
-                var response = await _clerk.ReserveQueueNumber(userId, device);
+                var ipAddress = GetUserIpAddress();
+                var response = await _clerk.ReserveQueueNumber(userId, ipAddress);
 
                 return Json(response);
             }
@@ -186,8 +235,8 @@ namespace PrinceQueuing.Controllers
             try
             {
                 var userId = GetCurrentUserId();
-                var device = GetDeviceId();
-                var response = await _clerk.CancelQueueNumber(userId, device);
+                var ipAddress = GetUserIpAddress();
+                var response = await _clerk.CancelQueueNumber(userId, ipAddress);
 
                 return Json(response);
             }
@@ -280,14 +329,47 @@ namespace PrinceQueuing.Controllers
             return User.GetUserId();
         }
 
-        private string GetDeviceId()
+
+        //private string GetUserIpAddress()
+        //{
+        //    string ipAddress = HttpContext.IpAddress();         
+        //    return ipAddress ?? "";
+        //}
+
+        //Temporary
+        private string GetUserIpAddress()
         {
-            ManagementObject os = new ManagementObject("Win32_OperatingSystem=@");
-            string deviceId = os["SerialNumber"].ToString()!;
+            string userIpAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString();
 
-            _logger.LogInformation(deviceId);
+            if (string.IsNullOrEmpty(userIpAddress) || userIpAddress == "::1")
+            {
+                try
+                {
+                    string hostName = Dns.GetHostName();
+                    IPHostEntry ipHostEntries = Dns.GetHostEntry(hostName);
+                    IPAddress[] ipAddresses = ipHostEntries.AddressList;
 
-            return deviceId;
+                    foreach (IPAddress ipAddress in ipAddresses)
+                    {
+                        if (ipAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        {
+                            userIpAddress = ipAddress.ToString();
+                            break;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(userIpAddress))
+                    {
+                        userIpAddress = ipAddresses.Length > 0 ? ipAddresses[0].ToString() : "127.0.0.1";
+                    }
+                }
+                catch
+                {
+                    userIpAddress = "127.0.0.1";
+                }
+            }
+
+            return userIpAddress;
         }
 
 

@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Management;
+using System.Security.Claims;
 
 namespace PrinceQueuing.Extensions
 {
@@ -18,5 +19,6 @@ namespace PrinceQueuing.Extensions
         {
             return principal.FindFirst(ClaimTypes.Email)!.Value;
         }
+
     }
 }
